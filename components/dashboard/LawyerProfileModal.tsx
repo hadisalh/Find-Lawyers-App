@@ -1,79 +1,100 @@
-import React from 'react';
-import { Lawyer } from '../../types';
-import { StarIcon, BriefcaseIcon, UserIcon, ChatIcon } from '../ui/icons';
+import React, { useState } from 'react';
+import { Lawyer, User, UserRole } from '../../types';
+import { AtSymbolIcon, PhoneIcon, BriefcaseIcon, UserIcon, ScaleIcon, StarIcon } from '../ui/icons';
 
 interface LawyerProfileModalProps {
   lawyer: Lawyer;
   onClose: () => void;
-  onStartChat: (lawyerId: number) => void;
+  currentUser: User;
+  onRateLawyer?: (lawyerId: number, rating: number, review: string) => void;
 }
 
-export const LawyerProfileModal: React.FC<LawyerProfileModalProps> = ({ lawyer, onClose, onStartChat }) => {
-  const handleStartChatClick = () => {
-    onStartChat(lawyer.id);
+export const LawyerProfileModal: React.FC<LawyerProfileModalProps> = ({ lawyer, onClose, currentUser, onRateLawyer }) => {
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [review, setReview] = useState('');
+
+  const isClientViewing = currentUser.role === UserRole.Client;
+
+  const handleRatingSubmit = () => {
+    if (rating > 0 && onRateLawyer) {
+      onRateLawyer(lawyer.id, rating, review);
+    } else {
+      alert('يرجى اختيار تقييم (عدد النجوم) على الأقل.');
+    }
   };
+
+  const InfoRow: React.FC<{icon: React.ReactNode; label: string; value: string | number}> = ({ icon, label, value }) => (
+    <div className="flex items-start gap-4 p-3">
+        <div className="text-slate-500 mt-1">{icon}</div>
+        <div>
+            <p className="text-sm font-semibold text-slate-600">{label}</p>
+            <p className="text-md font-bold text-slate-800">{value}</p>
+        </div>
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-        <header className="p-5 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-800">الملف الشخصي للمحامي</h2>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <header className="p-4 border-b flex justify-between items-center bg-slate-50 rounded-t-2xl">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-100 p-2 rounded-full">
+                <UserIcon className="w-6 h-6 text-blue-600"/>
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">{lawyer.fullName}</h2>
+          </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-3xl font-light" aria-label="Close">&times;</button>
         </header>
-        
-        <main className="p-6 overflow-y-auto">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-right gap-6 mb-8">
-            <div className="bg-slate-100 p-4 rounded-full border border-slate-200">
-              <UserIcon className="w-20 h-20 text-slate-500" />
+        <main className="p-6">
+            <div className="grid grid-cols-2 gap-2">
+                <InfoRow icon={<BriefcaseIcon className="w-5 h-5"/>} label="التخصص" value={lawyer.specialty} />
+                <InfoRow icon={<ScaleIcon className="w-5 h-5"/>} label="القضايا الرابحة" value={lawyer.wonCases} />
+                <InfoRow icon={<AtSymbolIcon className="w-5 h-5"/>} label="البريد الإلكتروني" value={lawyer.email} />
+                <InfoRow icon={<PhoneIcon className="w-5 h-5"/>} label="رقم الهاتف" value={lawyer.phone} />
             </div>
-            <div className="flex-grow">
-              <h3 className="text-4xl font-extrabold text-gray-900">{lawyer.fullName}</h3>
-              <p className="text-xl text-blue-600 font-semibold mt-1">{lawyer.specialty}</p>
+             <div className="pt-4">
+                <h3 className="font-bold text-slate-700 mb-2 px-3">التقييمات</h3>
+                <div className="max-h-24 overflow-y-auto bg-slate-50 rounded-lg p-2 space-y-2">
+                    {lawyer.reviews.length > 0 ? lawyer.reviews.map((review, index) => (
+                        <p key={index} className="text-sm text-slate-800 p-2 bg-white rounded shadow-sm">"{review}"</p>
+                    )) : <p className="text-sm text-center text-slate-500 p-2">لا توجد تقييمات بعد.</p>}
+                </div>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-            <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
-              <StarIcon className="w-10 h-10 text-yellow-400" />
-              <div>
-                <p className="font-extrabold text-2xl text-gray-800">{lawyer.rating.toFixed(1)}</p>
-                <p className="text-md text-gray-700">التقييم العام</p>
-              </div>
-            </div>
-             <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
-              <BriefcaseIcon className="w-10 h-10 text-green-600" />
-              <div>
-                <p className="font-extrabold text-2xl text-gray-800">{lawyer.wonCases}</p>
-                <p className="text-md text-gray-700">قضية ناجحة</p>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-xl font-bold text-gray-800 mb-4">آراء العملاء ({lawyer.reviews.length})</h4>
-            <div className="space-y-4 max-h-48 overflow-y-auto -mr-2 pr-2">
-              {lawyer.reviews.length > 0 ? (
-                lawyer.reviews.map((review, index) => (
-                  <blockquote key={index} className="bg-white border-l-4 border-blue-500 p-4 rounded-r-lg">
-                    <p className="text-gray-700 italic">"{review}"</p>
-                  </blockquote>
-                ))
-              ) : (
-                <p className="text-gray-600 text-center py-4">لا توجد مراجعات متاحة حالياً.</p>
-              )}
-            </div>
-          </div>
         </main>
-        
-        <footer className="p-5 border-t border-gray-200 bg-gray-50 flex justify-end rounded-b-2xl">
-           <button 
-              onClick={handleStartChatClick}
-              className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300"
-            >
-              <ChatIcon className="w-5 h-5" />
-              بدء محادثة خاصة
-            </button>
-        </footer>
+
+        {isClientViewing && onRateLawyer && (
+            <div className="p-6 border-t bg-slate-50 rounded-b-2xl">
+                <h3 className="text-lg font-bold text-gray-800 mb-3">أضف تقييمك</h3>
+                <div className="flex justify-center items-center mb-4" onMouseLeave={() => setHoverRating(0)}>
+                    {[...Array(5)].map((_, index) => {
+                        const starValue = index + 1;
+                        return (
+                            <StarIcon 
+                                key={starValue}
+                                className={`w-8 h-8 cursor-pointer transition-colors ${starValue <= (hoverRating || rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                                onClick={() => setRating(starValue)}
+                                onMouseEnter={() => setHoverRating(starValue)}
+                                filled={starValue <= (hoverRating || rating)}
+                            />
+                        )
+                    })}
+                </div>
+                <textarea 
+                    value={review}
+                    onChange={(e) => setReview(e.target.value)}
+                    placeholder="اكتب مراجعتك هنا (اختياري)..."
+                    className="w-full p-2 border border-gray-300 rounded-lg"
+                    rows={2}
+                />
+                <button 
+                    onClick={handleRatingSubmit}
+                    className="w-full mt-3 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+                >
+                    إرسال التقييم
+                </button>
+            </div>
+        )}
       </div>
     </div>
   );

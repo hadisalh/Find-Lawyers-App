@@ -1,21 +1,36 @@
 import React, { useState } from 'react';
-import { User, Lawyer, Client, UserRole, LawyerStatus, Post, Chat, Admin, AccountStatus } from '../../types';
-import { BriefcaseIcon, UserIcon, CheckBadgeIcon, XCircleIcon, TrashIcon, PencilIcon, EyeIcon, PlusIcon, ShieldCheckIcon, DocumentTextIcon, ChatBubbleLeftRightIcon, NoSymbolIcon } from '../ui/icons';
+import { User, Post, Chat, Lawyer, UserRole, LawyerStatus, AccountStatus, Admin } from '../../types';
+import { LawyerVerificationModal } from './LawyerVerificationModal';
+import { LawyerProfileModal } from './LawyerProfileModal';
+import { UserIcon, EyeIcon, TrashIcon, CheckCircleIcon, XCircleIcon, BriefcaseIcon, PlusIcon, LockClosedIcon, PhoneIcon, AtSymbolIcon } from '../ui/icons';
 
 interface AdminDashboardProps {
   users: User[];
-  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
   posts: Post[];
-  setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
   chats: Chat[];
+  onUpdateUser: (updatedUser: User) => void;
+  onUpdateUsersBatch: (updatedUsers: User[]) => void;
+  onDeletePost: (postId: number) => void;
   onViewChat: (chatId: string) => void;
-  onEditPost: (post: Post) => void;
-  onVerifyLawyer: (lawyer: Lawyer) => void;
+  onRegister: (newUser: User) => void;
+  onViewLawyerProfile: (lawyer: Lawyer) => void;
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, setUsers, posts, setPosts, chats, onViewChat, onEditPost, onVerifyLawyer }) => {
-  const [activeTab, setActiveTab] = useState('lawyers'); 
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({
+  users,
+  posts,
+  chats,
+  onUpdateUser,
+  onUpdateUsersBatch,
+  onDeletePost,
+  onViewChat,
+  onRegister,
+  onViewLawyerProfile
+}) => {
+  const [verifyingLawyer, setVerifyingLawyer] = useState<Lawyer | null>(null);
+  const [activeTab, setActiveTab] = useState<'users' | 'requests' | 'posts' | 'chats' | 'admins'>('requests');
   
+  // Admin registration form state
   const [adminName, setAdminName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPhone, setAdminPhone] = useState('');
@@ -23,229 +38,218 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, setUsers,
   const [adminError, setAdminError] = useState('');
 
   const lawyers = users.filter(u => u.role === UserRole.Lawyer) as Lawyer[];
-  const clients = users.filter(u => u.role === UserRole.Client) as Client[];
-  const admins = users.filter(u => u.role === UserRole.Admin) as Admin[];
-  
   const pendingLawyers = lawyers.filter(l => l.status === LawyerStatus.Pending);
-  const registeredLawyers = lawyers.filter(l => l.status === LawyerStatus.Approved);
+  const allOtherUsers = users.filter(u => u.role !== UserRole.Admin);
+  const admins = users.filter(u => u.role === UserRole.Admin);
 
-  const handleUserAccountStatusChange = (userId: number, newStatus: AccountStatus) => {
-    setUsers(currentUsers => currentUsers.map(user => 
-      user.id === userId ? { ...user, accountStatus: newStatus } : user
-    ));
-  };
-
-  const deleteUser = (userId: number) => {
-     if (userId === 1) { alert('لا يمكن حذف المدير الخارق.'); return; }
-    if(window.confirm('هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.')) {
-      setUsers(currentUsers => currentUsers.filter(user => user.id !== userId));
+  const handleStatusChange = (lawyerId: number, newStatus: LawyerStatus) => {
+    const lawyer = users.find(u => u.id === lawyerId) as Lawyer;
+    if (lawyer) {
+      // Fix: Create an intermediate variable for the updated lawyer to satisfy TypeScript's
+      // type checking, as `onUpdateUser` expects a `User` but was being passed an
+      // object literal with a `Lawyer`-specific property.
+      const updatedLawyer: Lawyer = { ...lawyer, status: newStatus };
+      onUpdateUser(updatedLawyer);
     }
   };
 
-  const deletePost = (postId: number) => {
-     if(window.confirm('هل أنت متأكد من حذف هذا المنشور؟')) {
-       setPosts(currentPosts => currentPosts.filter(post => post.id !== postId));
-     }
+  const handleAccountStatusChange = (userId: number, newStatus: AccountStatus) => {
+    const user = users.find(u => u.id === userId);
+    if (user && window.confirm(`هل أنت متأكد من ${newStatus === AccountStatus.Banned ? 'حظر' : 'إلغاء حظر'} هذا المستخدم؟`)) {
+        onUpdateUser({ ...user, accountStatus: newStatus });
+    }
   };
-
-  const handleAddAdmin = (e: React.FormEvent) => {
+  
+  const handleAdminRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setAdminError('');
-    if (!adminName || !adminEmail || !adminPhone || !adminPassword) {
-      setAdminError('يرجى ملء جميع الحقول.'); return;
+    if(!adminName || !adminEmail || !adminPhone || !adminPassword) {
+        setAdminError('يرجى ملء جميع الحقول.');
+        return;
     }
-    const newAdmin: Admin = { 
-      id: Date.now(), 
-      fullName: adminName, 
-      email: adminEmail, 
-      phone: adminPhone, 
-      password: adminPassword, 
-      role: UserRole.Admin,
-      accountStatus: AccountStatus.Active
+    if (users.some(u => u.email.toLowerCase() === adminEmail.toLowerCase() || u.phone === adminPhone)) {
+        setAdminError('البريد الإلكتروني أو رقم الهاتف مسجل بالفعل.');
+        return;
+    }
+    const newAdmin: Admin = {
+        id: Date.now(),
+        fullName: adminName,
+        email: adminEmail,
+        phone: adminPhone,
+        password: adminPassword,
+        role: UserRole.Admin,
+        accountStatus: AccountStatus.Active
     };
-    setUsers(prev => [...prev, newAdmin]);
+    onRegister(newAdmin);
+    alert('تم تعيين المشرف بنجاح!');
     setAdminName(''); setAdminEmail(''); setAdminPhone(''); setAdminPassword('');
-    alert('تمت إضافة المشرف بنجاح.');
+  }
+
+  const renderStatusBadge = (status: LawyerStatus) => {
+    const styles = {
+      [LawyerStatus.Approved]: 'bg-green-100 text-green-800',
+      [LawyerStatus.Pending]: 'bg-yellow-100 text-yellow-800',
+      [LawyerStatus.Rejected]: 'bg-red-100 text-red-800',
+    };
+    return <span className={`px-2 py-1 text-xs font-semibold rounded-full ${styles[status]}`}>{status}</span>;
   };
   
-  const TABS = [
-    { key: 'lawyers', label: 'المحامون', icon: <BriefcaseIcon className="w-6 h-6"/>, count: pendingLawyers.length },
-    { key: 'clients', label: 'العملاء', icon: <UserIcon className="w-6 h-6"/> },
-    { key: 'posts', label: 'المنشورات', icon: <DocumentTextIcon className="w-6 h-6"/> },
-    { key: 'chats', label: 'الدردشات', icon: <ChatBubbleLeftRightIcon className="w-6 h-6"/> },
-    { key: 'admins', label: 'المشرفون', icon: <ShieldCheckIcon className="w-6 h-6"/> },
-  ];
+  const renderAccountStatusBadge = (status: AccountStatus) => {
+    const styles = {
+      [AccountStatus.Active]: 'bg-blue-100 text-blue-800',
+      [AccountStatus.Banned]: 'bg-gray-200 text-gray-800',
+    };
+     return <span className={`px-2 py-1 text-xs font-semibold rounded-full ${styles[status]}`}>{status}</span>;
+  }
+
+  const TabButton: React.FC<{tab: typeof activeTab, label: string, count?: number}> = ({tab, label, count}) => (
+    <button onClick={() => setActiveTab(tab)} className={`px-4 py-2 font-bold rounded-lg transition-colors ${activeTab === tab ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}>
+      {label} {typeof count !== 'undefined' && <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeTab === tab ? 'bg-white text-blue-600' : 'bg-slate-300 text-slate-600'}`}>{count}</span>}
+    </button>
+  );
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'lawyers': return renderLawyerManagement();
-      case 'clients': return renderClientManagement();
-      case 'posts': return renderPostsManagement();
-      case 'chats': return renderChatsManagement();
-      case 'admins': return renderAdminsManagement();
-      default: return null;
-    }
-  };
-  
-  const ManagementCard: React.FC<{title: string, children: React.ReactNode, count?: number}> = ({title, count, children}) => (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">{title} {count !== undefined && `(${count})`}</h3>
-        <div className="space-y-4">{children}</div>
-    </div>
-  );
-
-  const ActionButton: React.FC<{onClick: () => void, icon: React.ReactNode, label: string, colorClass: string}> = ({ onClick, icon, label, colorClass }) => (
-      <button onClick={onClick} className={`flex items-center justify-center gap-2 text-sm font-bold py-2 px-3 rounded-lg transition-colors ${colorClass}`}>
-          {icon}
-          <span className="hidden sm:inline">{label}</span>
-      </button>
-  );
-
-  const renderLawyerManagement = () => (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-      <ManagementCard title="طلبات التسجيل المعلقة" count={pendingLawyers.length}>
-        {pendingLawyers.length > 0 ? pendingLawyers.map(lawyer => (
-          <div key={lawyer.id} className="bg-yellow-50 p-4 rounded-lg flex flex-wrap justify-between items-center gap-4 border border-yellow-200">
-            <div>
-              <p className="font-bold text-lg text-gray-800">{lawyer.fullName}</p>
-              <p className="text-sm text-gray-700">{lawyer.specialty}</p>
-            </div>
-            <ActionButton onClick={() => onVerifyLawyer(lawyer)} icon={<EyeIcon />} label="عرض التفاصيل" colorClass="bg-blue-100 text-blue-800 hover:bg-blue-200" />
-          </div>
-        )) : <p className="text-gray-600 text-center py-4">لا توجد طلبات معلقة حاليًا.</p>}
-      </ManagementCard>
-      <ManagementCard title="المحامون المسجلون" count={registeredLawyers.length}>
-        {registeredLawyers.map(lawyer => (
-            <div key={lawyer.id} className="bg-slate-50 p-4 rounded-lg flex justify-between items-center border border-slate-200">
-                <div>
-                    <p className="font-bold text-lg">{lawyer.fullName}</p>
-                    <p className={`text-sm font-semibold ${lawyer.accountStatus === AccountStatus.Banned ? 'text-red-600' : 'text-gray-700'}`}>{lawyer.accountStatus === AccountStatus.Banned ? 'محظور' : lawyer.specialty}</p>
-                </div>
-                 <div className="flex gap-2">
-                    {lawyer.accountStatus === AccountStatus.Active ? (
-                         <ActionButton onClick={() => handleUserAccountStatusChange(lawyer.id, AccountStatus.Banned)} icon={<NoSymbolIcon />} label="حظر" colorClass="bg-red-100 text-red-800 hover:bg-red-200" />
-                    ) : (
-                         <ActionButton onClick={() => handleUserAccountStatusChange(lawyer.id, AccountStatus.Active)} icon={<CheckBadgeIcon />} label="رفع الحظر" colorClass="bg-green-100 text-green-800 hover:bg-green-200" />
-                    )}
-                </div>
-            </div>
-        ))}
-      </ManagementCard>
-    </div>
-  );
-
-  const renderClientManagement = () => (
-    <ManagementCard title="العملاء المسجلون" count={clients.length}>
-      {clients.map(client => (
-        <div key={client.id} className="bg-slate-50 p-4 rounded-lg flex justify-between items-center border border-slate-200">
-          <div>
-            <p className="font-bold text-lg">{client.fullName}</p>
-            {client.accountStatus === AccountStatus.Banned && <p className="text-sm font-semibold text-red-600">محظور</p>}
-          </div>
-           <div className="flex gap-2">
-              {client.accountStatus === AccountStatus.Active ? (
-                   <ActionButton onClick={() => handleUserAccountStatusChange(client.id, AccountStatus.Banned)} icon={<NoSymbolIcon />} label="حظر" colorClass="bg-red-100 text-red-800 hover:bg-red-200" />
-              ) : (
-                   <ActionButton onClick={() => handleUserAccountStatusChange(client.id, AccountStatus.Active)} icon={<CheckBadgeIcon />} label="رفع الحظر" colorClass="bg-green-100 text-green-800 hover:bg-green-200" />
-              )}
-              <ActionButton onClick={() => deleteUser(client.id)} icon={<TrashIcon />} label="حذف" colorClass="bg-slate-200 text-slate-800 hover:bg-slate-300" />
-            </div>
-        </div>
-      ))}
-    </ManagementCard>
-  );
-  
-  const renderPostsManagement = () => (
-    <ManagementCard title="جميع المنشورات" count={posts.length}>
-      {posts.map(post => (
-        <div key={post.id} className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-          <div className="flex justify-between items-start gap-4">
-            <div className="flex-1">
-              <p className="font-bold text-lg">{post.title}</p>
-              <p className="text-sm text-gray-700">بواسطة: {post.clientName}</p>
-              <p className="mt-2 text-gray-800 text-md">{post.description}</p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <ActionButton onClick={() => onEditPost(post)} icon={<PencilIcon />} label="تعديل" colorClass="bg-blue-100 text-blue-800 hover:bg-blue-200" />
-              <ActionButton onClick={() => deletePost(post.id)} icon={<TrashIcon />} label="حذف" colorClass="bg-red-100 text-red-800 hover:bg-red-200" />
-            </div>
-          </div>
-        </div>
-      ))}
-    </ManagementCard>
-  );
-
-  const renderChatsManagement = () => (
-    <ManagementCard title="جميع الدردشات" count={chats.length}>
-      {chats.map(chat => {
-        const client = users.find(u => u.id === chat.clientId);
-        const lawyer = users.find(u => u.id === chat.lawyerId);
+      case 'requests':
         return (
-          <div key={chat.id} className="bg-slate-50 p-4 rounded-lg flex justify-between items-center border border-slate-200">
-            <div>
-              <p className="font-bold text-lg">{client?.fullName} &harr; {lawyer?.fullName}</p>
-              <p className="text-sm text-gray-700">{chat.messages.length} رسائل</p>
-            </div>
-            <ActionButton onClick={() => onViewChat(chat.id)} icon={<EyeIcon />} label="مشاهدة" colorClass="bg-indigo-100 text-indigo-800 hover:bg-indigo-200" />
+          <div className="space-y-4">
+            {pendingLawyers.length > 0 ? pendingLawyers.map(lawyer => (
+              <div key={lawyer.id} className="bg-white p-4 rounded-lg shadow-sm border flex justify-between items-center">
+                <div>
+                  <p className="font-bold text-lg text-gray-800">{lawyer.fullName}</p>
+                  <p className="text-sm text-gray-600">{lawyer.specialty}</p>
+                </div>
+                <button onClick={() => setVerifyingLawyer(lawyer)} className="bg-blue-100 text-blue-800 font-bold py-2 px-4 rounded-lg hover:bg-blue-200 transition-colors">مراجعة الطلب</button>
+              </div>
+            )) : <p className="text-center text-gray-600 py-8">لا توجد طلبات تحقق جديدة.</p>}
           </div>
         );
-      })}
-    </ManagementCard>
-  );
-  
-  const renderAdminsManagement = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2"><PlusIcon/> إضافة مشرف جديد</h3>
-        <form onSubmit={handleAddAdmin} className="space-y-4">
-           {adminError && <p className="text-red-600 font-semibold">{adminError}</p>}
-          <input value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="الاسم الكامل" className="w-full p-3 border border-slate-300 rounded-lg"/>
-          <input value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="البريد الإلكتروني" className="w-full p-3 border border-slate-300 rounded-lg"/>
-          <input value={adminPhone} onChange={e => setAdminPhone(e.target.value)} placeholder="رقم الهاتف" className="w-full p-3 border border-slate-300 rounded-lg"/>
-          <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="كلمة المرور" className="w-full p-3 border border-slate-300 rounded-lg"/>
-          <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 transition-colors">إضافة مشرف</button>
-        </form>
-      </div>
-      <ManagementCard title="المشرفون الحاليون" count={admins.length}>
-          {admins.map(admin => (
-            <div key={admin.id} className="bg-slate-50 p-4 rounded-lg flex justify-between items-center border border-slate-200">
-               <p className="font-bold text-lg">{admin.fullName} {admin.id === 1 && <span className="text-xs font-bold text-green-600 bg-green-100 py-1 px-2 rounded-full">خارق</span>}</p>
-               {admin.id !== 1 && (
-                <ActionButton onClick={() => deleteUser(admin.id)} icon={<TrashIcon />} label="حذف" colorClass="bg-red-100 text-red-800 hover:bg-red-200" />
-               )}
-            </div>
-          ))}
-      </ManagementCard>
-    </div>
-  );
+      case 'users':
+        return (
+          <div className="overflow-x-auto bg-white rounded-lg shadow border">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المستخدم</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الدور</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الحالة</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {allOtherUsers.map(user => (
+                  <tr key={user.id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="font-semibold text-gray-900">{user.fullName}</div>
+                      <div className="text-sm text-gray-500">{user.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.role === UserRole.Lawyer ? `محامي (${(user as Lawyer).specialty})` : 'عميل'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                        {user.role === UserRole.Lawyer && renderStatusBadge((user as Lawyer).status)}
+                        {renderAccountStatusBadge(user.accountStatus)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      {user.role === UserRole.Lawyer && <button onClick={() => onViewLawyerProfile(user as Lawyer)} className="text-blue-600 hover:text-blue-900">عرض</button>}
+                      {user.accountStatus === AccountStatus.Active ?
+                        <button onClick={() => handleAccountStatusChange(user.id, AccountStatus.Banned)} className="text-red-600 hover:text-red-900">حظر</button>
+                        : <button onClick={() => handleAccountStatusChange(user.id, AccountStatus.Active)} className="text-green-600 hover:text-green-900">إلغاء الحظر</button>
+                      }
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+        case 'posts':
+            return (
+                <div className="space-y-4">
+                    {posts.map(post => (
+                        <div key={post.id} className="bg-white p-4 rounded-lg shadow-sm border flex justify-between items-center">
+                            <div>
+                                <p className="font-bold text-lg text-gray-800">{post.title}</p>
+                                <p className="text-sm text-gray-600">بواسطة: {post.clientName}</p>
+                            </div>
+                            <button onClick={() => window.confirm('هل أنت متأكد؟') && onDeletePost(post.id)} className="bg-red-100 p-2 rounded-full hover:bg-red-200 transition">
+                                <TrashIcon className="w-5 h-5 text-red-600" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            );
+        case 'chats':
+            return (
+                <div className="space-y-3">
+                    {chats.map(chat => {
+                        const client = users.find(u => u.id === chat.clientId);
+                        const lawyer = users.find(u => u.id === chat.lawyerId);
+                        return (
+                            <div key={chat.id} className="bg-white p-4 rounded-lg shadow-sm border flex justify-between items-center">
+                                <div>
+                                    <p className="font-semibold text-gray-800">{client?.fullName} <span className="font-normal text-gray-500">↔</span> {lawyer?.fullName}</p>
+                                    <p className="text-sm text-gray-500">{chat.messages.length} رسائل</p>
+                                </div>
+                                <button onClick={() => onViewChat(chat.id)} className="bg-blue-100 p-2 rounded-full hover:bg-blue-200 transition">
+                                    <EyeIcon className="w-5 h-5 text-blue-600" />
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        case 'admins':
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-4">المشرفون الحاليون</h3>
+                        <div className="space-y-3">
+                            {admins.map(admin => (
+                                <div key={admin.id} className="bg-white p-4 rounded-lg shadow-sm border">
+                                    <p className="font-bold text-gray-800">{admin.fullName}</p>
+                                    <p className="text-sm text-gray-500">{admin.email}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-lg border">
+                         <h3 className="text-2xl font-bold text-gray-800 mb-4">تعيين مشرف جديد</h3>
+                         <form onSubmit={handleAdminRegister} className="space-y-4">
+                            {adminError && <p className="text-red-600 text-sm">{adminError}</p>}
+                            <input value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="الاسم الكامل" className="w-full p-2 border rounded" required/>
+                            <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="البريد الإلكتروني" className="w-full p-2 border rounded" required/>
+                            <input value={adminPhone} onChange={e => setAdminPhone(e.target.value)} placeholder="رقم الهاتف" className="w-full p-2 border rounded" required/>
+                            <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="كلمة المرور" className="w-full p-2 border rounded" required/>
+                            <button type="submit" className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition">إضافة مشرف</button>
+                         </form>
+                    </div>
+                </div>
+            )
+    }
+  };
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      <h1 className="text-3xl font-extrabold text-gray-800 mb-6">لوحة تحكم المدير</h1>
-      <div className="bg-white rounded-xl shadow-lg border border-slate-200">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex gap-4 sm:gap-6 px-4 sm:px-6 overflow-x-auto" aria-label="Tabs">
-             {TABS.map(tab => (
-                 <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`whitespace-nowrap py-4 px-2 border-b-4 font-bold text-md sm:text-lg flex items-center gap-2 transition-colors ${activeTab === tab.key ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300'}`}
-                >
-                  {tab.icon}
-                  {tab.label}
-                  {tab.count > 0 && (
-                    <span className="bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
-             ))}
-          </nav>
-        </div>
-        <div className="p-4 sm:p-6 bg-slate-50 rounded-b-xl">
-          {renderContent()}
-        </div>
+      <h2 className="text-3xl font-extrabold text-gray-800 mb-6">لوحة تحكم المدير</h2>
+      
+      <div className="mb-6 flex flex-wrap gap-2">
+        <TabButton tab="requests" label="طلبات التحقق" count={pendingLawyers.length} />
+        <TabButton tab="users" label="إدارة المستخدمين" />
+        <TabButton tab="posts" label="إدارة المنشورات" />
+        <TabButton tab="chats" label="مراقبة المحادثات" />
+        <TabButton tab="admins" label="إدارة المشرفين" />
       </div>
+
+      <div className="bg-slate-50 p-4 sm:p-6 rounded-lg">
+        {renderContent()}
+      </div>
+
+      {verifyingLawyer && (
+        <LawyerVerificationModal
+          lawyer={verifyingLawyer}
+          onClose={() => setVerifyingLawyer(null)}
+          onStatusChange={handleStatusChange}
+        />
+      )}
     </div>
   );
 };

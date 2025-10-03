@@ -1,156 +1,195 @@
 import React, { useState, useEffect } from 'react';
-import { User, Post, Chat, UserRole, Lawyer, Comment, ChatMessage, Admin, LawyerStatus, AccountStatus } from './types';
-import { USERS, POSTS, CHATS } from './constants';
 import { Auth } from './components/Auth';
-import { Disclaimer } from './components/Disclaimer';
 import { Header } from './components/common/Header';
 import { AdminDashboard } from './components/dashboard/AdminDashboard';
-import { ClientDashboard } from './components/dashboard/ClientDashboard';
 import { LawyerDashboard } from './components/dashboard/LawyerDashboard';
+import { ClientDashboard } from './components/dashboard/ClientDashboard';
 import { ChatWindow } from './components/chat/ChatWindow';
+import { Disclaimer } from './components/Disclaimer';
+import { User, Post, Chat, Comment, UserRole, Lawyer, Client, ChatMessage } from './types';
+import { USERS, POSTS, CHATS } from './constants';
 import { LawyerProfileModal } from './components/dashboard/LawyerProfileModal';
-import { EditPostModal } from './components/dashboard/EditPostModal';
-import { LawyerVerificationModal } from './components/dashboard/LawyerVerificationModal';
 
-function App() {
+const App: React.FC = () => {
+  const [disclaimerAgreed, setDisclaimerAgreed] = useState<boolean>(() => JSON.parse(localStorage.getItem('disclaimerAgreed') || 'false'));
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem('currentUser');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
   const [users, setUsers] = useState<User[]>(USERS);
   const [posts, setPosts] = useState<Post[]>(POSTS);
   const [chats, setChats] = useState<Chat[]>(CHATS);
-  
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [viewingLawyerProfileId, setViewingLawyerProfileId] = useState<number | null>(null);
-  const [editingPost, setEditingPost] = useState<Post | null>(null);
-  const [verifyingLawyer, setVerifyingLawyer] = useState<Lawyer | null>(null);
+  const [adminViewingChatId, setAdminViewingChatId] = useState<string | null>(null);
+  const [viewingLawyerProfile, setViewingLawyerProfile] = useState<Lawyer | null>(null);
 
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('currentUser');
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+     localStorage.setItem('disclaimerAgreed', JSON.stringify(disclaimerAgreed));
+  }, [disclaimerAgreed])
 
   const handleLogin = (user: User) => {
     setCurrentUser(user);
   };
 
-  const handleRegisterUser = (newUser: User) => {
-    setUsers(prevUsers => [...prevUsers, newUser]);
-  };
-
   const handleLogout = () => {
     setCurrentUser(null);
-    setActiveChatId(null);
-    setEditingPost(null);
-    setViewingLawyerProfileId(null);
-    setVerifyingLawyer(null);
   };
 
-  const handleAgreeDisclaimer = () => {
-    setShowDisclaimer(false);
+  const handleRegister = (newUser: User) => {
+    setUsers(prevUsers => [...prevUsers, newUser]);
   };
   
-  const handleCommentSubmit = (postId: number, comment: Comment) => {
-    setPosts(posts.map(p => 
-      p.id === postId ? { ...p, comments: [...p.comments, comment] } : p
-    ));
+  const handleUpdateUser = (updatedUser: User) => {
+    setUsers(prevUsers => prevUsers.map(u => u.id === updatedUser.id ? updatedUser : u));
+  }
+
+  const handleUpdateUsersBatch = (updatedUsers: User[]) => {
+      const updatedUserMap = new Map(updatedUsers.map(u => [u.id, u]));
+      setUsers(prevUsers => prevUsers.map(u => updatedUserMap.get(u.id) || u));
+  }
+  
+  const handleAddPost = (postData: Omit<Post, 'id' | 'createdAt' | 'comments'>) => {
+    const newPost: Post = {
+        ...postData,
+        id: Date.now(),
+        createdAt: new Date().toISOString(),
+        comments: [],
+    };
+    setPosts(prevPosts => [newPost, ...prevPosts]);
   };
 
   const handleUpdatePost = (updatedPost: Post) => {
-    setPosts(posts.map(p => p.id === updatedPost.id ? updatedPost : p));
-    setEditingPost(null);
+    setPosts(prevPosts => prevPosts.map(p => p.id === updatedPost.id ? updatedPost : p));
+  };
+  
+  const handleDeletePost = (postId: number) => {
+    setPosts(prevPosts => prevPosts.filter(p => p.id !== postId));
   };
 
-  const handleLawyerStatusChange = (lawyerId: number, newStatus: LawyerStatus) => {
-    setUsers(currentUsers => currentUsers.map(user => 
-        user.id === lawyerId ? { ...user, status: newStatus } as Lawyer : user
+  const handleCommentSubmit = (postId: number, comment: Comment) => {
+    setPosts(prevPosts => prevPosts.map(post => 
+      post.id === postId ? { ...post, comments: [...post.comments, comment] } : post
+    ));
+  };
+
+  const handleSelectLawyer = (lawyerId: number) => {
+    if (currentUser?.role !== UserRole.Client) return;
+    const clientId = currentUser.id;
+    const chatId = `client-${clientId}-lawyer-${lawyerId}`;
+    
+    if (!chats.find(c => c.id === chatId)) {
+        const newChat: Chat = {
+            id: chatId,
+            clientId,
+            lawyerId,
+            messages: [],
+        };
+        setChats(prevChats => [...prevChats, newChat]);
+    }
+    setActiveChatId(chatId);
+  };
+
+  const handleSendMessage = (chatId: string, message: ChatMessage) => {
+    setChats(prevChats => prevChats.map(chat => 
+        chat.id === chatId ? { ...chat, messages: [...chat.messages, message] } : chat
     ));
   };
   
-  const handleStartChat = (lawyerId: number) => {
-    if (!currentUser || currentUser.role !== UserRole.Client) return;
-
-    const chatId = `client-${currentUser.id}-lawyer-${lawyerId}`;
-    const existingChat = chats.find(c => c.id === chatId);
-
-    if (existingChat) {
-      setActiveChatId(existingChat.id);
-    } else {
-      const newChat: Chat = { id: chatId, clientId: currentUser.id, lawyerId: lawyerId, messages: [] };
-      setChats(prevChats => [...prevChats, newChat]);
-      setActiveChatId(newChat.id);
-    }
-  };
-
-  const handleViewLawyerProfile = (lawyerId: number) => {
-    setViewingLawyerProfileId(lawyerId);
-  };
-  
-  const handleSendMessage = (chatId: string, message: ChatMessage) => {
-      setChats(chats.map(c => 
-        c.id === chatId ? { ...c, messages: [...c.messages, message] } : c
-      ));
-  };
-  
-  const activeChat = chats.find(c => c.id === activeChatId);
-  let otherUserInChatName = '';
-  let isChatReadOnlyForAdmin = false;
-
-  if (activeChat && currentUser) {
-      if (currentUser.role === UserRole.Admin) {
-          const client = users.find(u => u.id === activeChat.clientId);
-          const lawyer = users.find(u => u.id === activeChat.lawyerId);
-          otherUserInChatName = `محادثة: ${client?.fullName} و ${lawyer?.fullName}`;
-          isChatReadOnlyForAdmin = true;
-      } else {
-          const otherUserId = currentUser.role === UserRole.Client ? activeChat.lawyerId : activeChat.clientId;
-          const otherUser = users.find(u => u.id === otherUserId);
-          otherUserInChatName = otherUser?.fullName || 'مستخدم غير معروف';
+  const handleRateLawyer = (lawyerId: number, rating: number, review: string) => {
+    setUsers(prevUsers => prevUsers.map(user => {
+      if (user.id === lawyerId && user.role === UserRole.Lawyer) {
+        const lawyer = user as Lawyer;
+        const newReviews = review ? [...lawyer.reviews, review] : lawyer.reviews;
+        const totalRatingPoints = (lawyer.rating * lawyer.reviews.length) + rating;
+        const newAverageRating = totalRatingPoints / (lawyer.reviews.length + 1);
+        
+        return {
+          ...lawyer,
+          reviews: newReviews,
+          rating: parseFloat(newAverageRating.toFixed(1)),
+        };
       }
-  }
-
-  const lawyerToView = users.find(u => u.id === viewingLawyerProfileId) as Lawyer | undefined;
+      return user;
+    }));
+    alert('شكراً لتقييمك!');
+    setViewingLawyerProfile(null);
+  };
 
   const renderDashboard = () => {
     if (!currentUser) return null;
-    
     switch (currentUser.role) {
       case UserRole.Admin:
-        return <AdminDashboard users={users} setUsers={setUsers} posts={posts} setPosts={setPosts} chats={chats} onViewChat={setActiveChatId} onEditPost={setEditingPost} onVerifyLawyer={setVerifyingLawyer} />;
-      case UserRole.Client:
-        return <ClientDashboard currentUser={currentUser} posts={posts} users={users} chats={chats} setPosts={setPosts} onStartChat={handleStartChat} onChatIconClick={setActiveChatId} onViewProfile={handleViewLawyerProfile} />;
+        return <AdminDashboard users={users} posts={posts} chats={chats} onUpdateUser={handleUpdateUser} onUpdateUsersBatch={handleUpdateUsersBatch} onDeletePost={handleDeletePost} onViewChat={setAdminViewingChatId} onRegister={handleRegister} onViewLawyerProfile={setViewingLawyerProfile} />;
       case UserRole.Lawyer:
-        return <LawyerDashboard currentUser={currentUser as Lawyer} posts={posts} chats={chats} users={users} onCommentSubmit={handleCommentSubmit} onChatIconClick={setActiveChatId} />;
+        return <LawyerDashboard currentUser={currentUser as Lawyer} posts={posts} chats={chats} users={users} onCommentSubmit={handleCommentSubmit} onChatIconClick={setActiveChatId}/>;
+      case UserRole.Client:
+        return <ClientDashboard currentUser={currentUser as Client} posts={posts} chats={chats} users={users} onAddPost={handleAddPost} onUpdatePost={handleUpdatePost} onDeletePost={handleDeletePost} onCommentSubmit={handleCommentSubmit} onSelectLawyer={handleSelectLawyer} onChatIconClick={setActiveChatId} onViewLawyerProfile={setViewingLawyerProfile}/>;
       default:
-        return <div>لوحة تحكم غير معروفة.</div>;
+        return <div>Unknown user role</div>;
     }
   };
   
-  if (showDisclaimer) {
-      return <Disclaimer onAgree={handleAgreeDisclaimer} />;
+  const activeChat = chats.find(c => c.id === activeChatId);
+  const adminViewingChat = chats.find(c => c.id === adminViewingChatId);
+
+  if (!disclaimerAgreed) {
+      return <Disclaimer onAgree={() => setDisclaimerAgreed(true)} />
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen">
+    <div className="bg-slate-50 min-h-screen font-sans">
       {!currentUser ? (
-        <Auth onLogin={handleLogin} users={users} onRegister={handleRegisterUser} />
+        <Auth users={users} onLogin={handleLogin} onRegister={handleRegister} />
       ) : (
         <>
           <Header user={currentUser} onLogout={handleLogout} />
           <main>
             {renderDashboard()}
           </main>
-           {activeChat && currentUser && (
-              <ChatWindow chat={activeChat} currentUser={currentUser} otherUserName={otherUserInChatName} onSendMessage={handleSendMessage} onClose={() => setActiveChatId(null)} isReadOnly={isChatReadOnlyForAdmin} />
+          {activeChat && (
+              <ChatWindow 
+                chat={activeChat}
+                currentUser={currentUser}
+                otherUserName={
+                    currentUser.role === UserRole.Client 
+                    ? users.find(u => u.id === activeChat.lawyerId)?.fullName || 'محامي'
+                    : users.find(u => u.id === activeChat.clientId)?.fullName || 'عميل'
+                }
+                onSendMessage={handleSendMessage}
+                onClose={() => setActiveChatId(null)}
+              />
           )}
-          {lawyerToView && (
-            <LawyerProfileModal lawyer={lawyerToView} onClose={() => setViewingLawyerProfileId(null)} onStartChat={(lawyerId) => { setViewingLawyerProfileId(null); handleStartChat(lawyerId); }} />
+           {adminViewingChat && (
+              <ChatWindow 
+                chat={adminViewingChat}
+                currentUser={currentUser}
+                otherUserName={`محادثة بين ${users.find(u => u.id === adminViewingChat.clientId)?.fullName} و ${users.find(u => u.id === adminViewingChat.lawyerId)?.fullName}`}
+                onSendMessage={() => {}} // No sending for admin
+                onClose={() => setAdminViewingChatId(null)}
+                isReadOnly={true}
+              />
           )}
-          {editingPost && (
-            <EditPostModal post={editingPost} onSave={handleUpdatePost} onClose={() => setEditingPost(null)} />
-          )}
-          {verifyingLawyer && (
-            <LawyerVerificationModal lawyer={verifyingLawyer} onClose={() => setVerifyingLawyer(null)} onStatusChange={handleLawyerStatusChange} />
+          {viewingLawyerProfile && currentUser && (
+              <LawyerProfileModal
+                lawyer={viewingLawyerProfile}
+                onClose={() => setViewingLawyerProfile(null)}
+                currentUser={currentUser}
+                onRateLawyer={handleRateLawyer}
+              />
           )}
         </>
       )}
     </div>
   );
-}
+};
 
 export default App;

@@ -1,20 +1,25 @@
 import React from 'react';
-import { Post, User, Lawyer, Comment as CommentType, UserRole, Chat } from '../../types';
+import { Post, Comment, User, Chat, Lawyer } from '../../types';
 import { PostCard } from '../common/PostCard';
-import { StarIcon, BriefcaseIcon, UserIcon } from '../ui/icons';
+import { UserIcon } from '../ui/icons';
 
 interface LawyerDashboardProps {
   currentUser: Lawyer;
   posts: Post[];
   chats: Chat[];
   users: User[];
-  onCommentSubmit: (postId: number, comment: CommentType) => void;
+  onCommentSubmit: (postId: number, comment: Comment) => void;
   onChatIconClick: (chatId: string) => void;
 }
 
-export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ currentUser, posts, chats, users, onCommentSubmit, onChatIconClick }) => {
-  
-  const onSelectLawyer = (lawyerId: number) => {};
+export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({
+  currentUser,
+  posts,
+  chats,
+  users,
+  onCommentSubmit,
+  onChatIconClick,
+}) => {
   const lawyerChats = chats.filter(c => c.lawyerId === currentUser.id);
 
   return (
@@ -22,69 +27,58 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ currentUser, p
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         <main className="lg:col-span-2">
-           <h1 className="text-3xl font-extrabold text-gray-800 mb-6">الاستشارات المتاحة</h1>
+          <h2 className="text-3xl font-extrabold text-gray-800 mb-6">استشارات العملاء المتاحة</h2>
           {posts.length > 0 ? (
             posts.map(post => (
-              <PostCard key={post.id} post={post} currentUser={currentUser} onCommentSubmit={onCommentSubmit} onSelectLawyer={onSelectLawyer} />
+              <PostCard
+                key={post.id}
+                post={post}
+                currentUser={currentUser}
+                onCommentSubmit={onCommentSubmit}
+                onSelectLawyer={() => {}} // Lawyers don't select other lawyers
+              />
             ))
           ) : (
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center text-gray-600">
-                <h3 className="text-xl font-bold text-gray-700 mb-2">لا توجد استشارات حاليًا</h3>
-                <p>لا توجد استشارات منشورة من قبل العملاء في الوقت الحالي. يرجى التحقق مرة أخرى قريبًا.</p>
+            <div className="text-center py-16 bg-white rounded-lg shadow-md">
+                <p className="text-gray-600 text-lg">لا توجد استشارات منشورة حاليًا.</p>
             </div>
           )}
         </main>
-        
+
         <aside className="lg:col-span-1">
           <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200 sticky top-24">
-            <h2 className="text-2xl font-bold text-gray-800 border-b border-slate-200 pb-4 mb-4">ملفك الشخصي</h2>
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center gap-3">
-                <StarIcon className="w-6 h-6 text-yellow-400" />
-                <div>
-                    <span className="font-bold text-lg">{currentUser.rating.toFixed(1)}</span>
-                    <span className="text-sm text-gray-700"> ({currentUser.reviews.length} مراجعات)</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <BriefcaseIcon className="w-6 h-6 text-green-600"/>
-                <span className="font-bold text-lg">{currentUser.wonCases}</span>
-                <span className="text-sm text-gray-700">قضية ناجحة</span>
-              </div>
-            </div>
-
-            <h2 className="text-2xl font-bold text-gray-800 border-b border-slate-200 pb-4 mb-4">محادثاتي</h2>
-             <div className="space-y-3 max-h-[40vh] overflow-y-auto -mr-2 pr-2">
-              {lawyerChats.length > 0 ? (
-                lawyerChats.map(chat => {
+            <h2 className="text-2xl font-bold text-gray-800 mb-4 border-b pb-3">محادثاتي</h2>
+            {lawyerChats.length > 0 ? (
+              <ul className="space-y-3">
+                {lawyerChats.map(chat => {
                   const client = users.find(u => u.id === chat.clientId);
-                  const lastMessage = chat.messages[chat.messages.length - 1];
+                  if (!client) return null;
+                   const lastMessage = chat.messages[chat.messages.length - 1];
                   return (
-                    <button 
-                      key={chat.id} 
-                      onClick={() => onChatIconClick(chat.id)}
-                      className="w-full text-right p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors flex items-start gap-3 border border-slate-200"
-                    >
-                      <div className="bg-slate-200 p-2 rounded-full">
-                        <UserIcon className="w-6 h-6 text-slate-600" />
+                    <li key={chat.id} className="p-3 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer" onClick={() => onChatIconClick(chat.id)}>
+                      <div className="flex items-center gap-3">
+                         <div className="bg-slate-200 p-2 rounded-full">
+                           <UserIcon className="w-6 h-6 text-slate-600"/>
+                         </div>
+                         <div>
+                            <p className="font-bold text-gray-800">{client.fullName}</p>
+                            <p className="text-sm text-gray-600 truncate max-w-[200px]">
+                               {lastMessage ? lastMessage.text : 'ابدأ المحادثة...'}
+                            </p>
+                         </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-gray-800">{client?.fullName || 'عميل غير معروف'}</p>
-                        <p className="text-sm text-gray-600 truncate">
-                          {lastMessage ? lastMessage.text : 'ابدأ المحادثة...'}
-                        </p>
-                      </div>
-                    </button>
+                    </li>
                   );
-                })
-              ) : (
-                 <div className="text-center text-gray-600 py-6">
-                    <p>لا توجد لديك محادثات بعد.</p>
-                </div>
-              )}
-            </div>
+                })}
+              </ul>
+            ) : (
+              <p className="text-center text-gray-600 py-4">
+                لا توجد محادثات. قدم عرضًا على استشارة لبدء محادثة.
+              </p>
+            )}
           </div>
         </aside>
+
       </div>
     </div>
   );
