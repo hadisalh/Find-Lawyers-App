@@ -108,18 +108,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, setUsers,
           <div key={lawyer.id} className="bg-yellow-50 p-4 rounded-lg flex flex-wrap justify-between items-center gap-4 border border-yellow-200">
             <div>
               <p className="font-bold text-lg text-gray-800">{lawyer.fullName}</p>
-              <p className="text-sm text-gray-600">{lawyer.specialty}</p>
+              <p className="text-sm text-gray-700">{lawyer.specialty}</p>
             </div>
             <ActionButton onClick={() => onVerifyLawyer(lawyer)} icon={<EyeIcon />} label="عرض التفاصيل" colorClass="bg-blue-100 text-blue-800 hover:bg-blue-200" />
           </div>
-        )) : <p className="text-gray-500 text-center py-4">لا توجد طلبات معلقة حاليًا.</p>}
+        )) : <p className="text-gray-600 text-center py-4">لا توجد طلبات معلقة حاليًا.</p>}
       </ManagementCard>
       <ManagementCard title="المحامون المسجلون" count={registeredLawyers.length}>
         {registeredLawyers.map(lawyer => (
             <div key={lawyer.id} className="bg-slate-50 p-4 rounded-lg flex justify-between items-center border border-slate-200">
                 <div>
                     <p className="font-bold text-lg">{lawyer.fullName}</p>
-                    <p className={`text-sm font-semibold ${lawyer.accountStatus === AccountStatus.Banned ? 'text-red-600' : 'text-gray-600'}`}>{lawyer.accountStatus === AccountStatus.Banned ? 'محظور' : lawyer.specialty}</p>
+                    <p className={`text-sm font-semibold ${lawyer.accountStatus === AccountStatus.Banned ? 'text-red-600' : 'text-gray-700'}`}>{lawyer.accountStatus === AccountStatus.Banned ? 'محظور' : lawyer.specialty}</p>
                 </div>
                  <div className="flex gap-2">
                     {lawyer.accountStatus === AccountStatus.Active ? (
@@ -162,7 +162,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, setUsers,
           <div className="flex justify-between items-start gap-4">
             <div className="flex-1">
               <p className="font-bold text-lg">{post.title}</p>
-              <p className="text-sm text-gray-600">بواسطة: {post.clientName}</p>
+              <p className="text-sm text-gray-700">بواسطة: {post.clientName}</p>
               <p className="mt-2 text-gray-800 text-md">{post.description}</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -184,7 +184,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, setUsers,
           <div key={chat.id} className="bg-slate-50 p-4 rounded-lg flex justify-between items-center border border-slate-200">
             <div>
               <p className="font-bold text-lg">{client?.fullName} &harr; {lawyer?.fullName}</p>
-              <p className="text-sm text-gray-600">{chat.messages.length} رسائل</p>
+              <p className="text-sm text-gray-700">{chat.messages.length} رسائل</p>
             </div>
             <ActionButton onClick={() => onViewChat(chat.id)} icon={<EyeIcon />} label="مشاهدة" colorClass="bg-indigo-100 text-indigo-800 hover:bg-indigo-200" />
           </div>
@@ -229,7 +229,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ users, setUsers,
                  <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`whitespace-nowrap py-4 px-2 border-b-4 font-bold text-md sm:text-lg flex items-center gap-2 transition-colors ${activeTab === tab.key ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                  className={`whitespace-nowrap py-4 px-2 border-b-4 font-bold text-md sm:text-lg flex items-center gap-2 transition-colors ${activeTab === tab.key ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300'}`}
                 >
                   {tab.icon}
                   {tab.label}

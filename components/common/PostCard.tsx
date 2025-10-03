@@ -43,7 +43,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onComment
           </div>
           <div>
             <p className="font-bold text-lg text-gray-800">{post.clientName}</p>
-            <p className="text-sm text-gray-500">{new Date(post.createdAt).toLocaleDateString('ar-IQ', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <p className="text-sm text-gray-600">{new Date(post.createdAt).toLocaleDateString('ar-IQ', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
           </div>
         </div>
         <h3 className="text-2xl font-extrabold text-gray-900 mb-3">{post.title}</h3>
@@ -66,7 +66,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onComment
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
                     <div>
                       <p className="font-bold text-lg text-blue-700">{comment.lawyerName}</p>
-                      <p className="text-sm text-gray-500 mb-2">{comment.lawyerSpecialty}</p>
+                      <p className="text-sm text-gray-600 mb-2">{comment.lawyerSpecialty}</p>
                       <p className="text-gray-800 my-1">{comment.text}</p>
                     </div>
                     <div className="mt-3 sm:mt-0 sm:text-left">
@@ -85,7 +85,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onComment
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-4">لا توجد عروض بعد. كن أول من يقدم عرضًا!</p>
+            <p className="text-gray-600 text-center py-4">لا توجد عروض بعد. كن أول من يقدم عرضًا!</p>
           )}
 
           {currentUser.role === UserRole.Lawyer && (

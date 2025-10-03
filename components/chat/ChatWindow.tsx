@@ -56,7 +56,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, currentUser, other
           <div key={msg.id} className={`flex mb-3 ${isMyMessage(msg) ? 'justify-end' : 'justify-start'}`}>
             <div className={`rounded-2xl py-2 px-4 max-w-[80%] ${isMyMessage(msg) ? 'bg-blue-600 text-white rounded-br-none' : 'bg-slate-200 text-gray-800 rounded-bl-none'}`}>
               <p className="text-md">{msg.text}</p>
-              <p className={`text-xs mt-1 text-right ${isMyMessage(msg) ? 'text-blue-200' : 'text-gray-500'}`}>
+              <p className={`text-xs mt-1 text-right ${isMyMessage(msg) ? 'text-blue-200' : 'text-gray-600'}`}>
                 {new Date(msg.timestamp).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
@@ -81,7 +81,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, currentUser, other
           </div>
         </form>
       ) : (
-         <div className="p-3 border-t text-center bg-slate-100 text-sm text-slate-500 font-semibold">
+         <div className="p-3 border-t text-center bg-slate-100 text-sm text-slate-600 font-semibold">
            وضع القراءة فقط
          </div>
       )}

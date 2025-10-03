@@ -28,7 +28,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ currentUser, p
               <PostCard key={post.id} post={post} currentUser={currentUser} onCommentSubmit={onCommentSubmit} onSelectLawyer={onSelectLawyer} />
             ))
           ) : (
-            <div className="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center text-gray-500">
+            <div className="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center text-gray-600">
                 <h3 className="text-xl font-bold text-gray-700 mb-2">لا توجد استشارات حاليًا</h3>
                 <p>لا توجد استشارات منشورة من قبل العملاء في الوقت الحالي. يرجى التحقق مرة أخرى قريبًا.</p>
             </div>
@@ -43,13 +43,13 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ currentUser, p
                 <StarIcon className="w-6 h-6 text-yellow-400" />
                 <div>
                     <span className="font-bold text-lg">{currentUser.rating.toFixed(1)}</span>
-                    <span className="text-sm text-gray-500"> ({currentUser.reviews.length} مراجعات)</span>
+                    <span className="text-sm text-gray-700"> ({currentUser.reviews.length} مراجعات)</span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <BriefcaseIcon className="w-6 h-6 text-green-600"/>
                 <span className="font-bold text-lg">{currentUser.wonCases}</span>
-                <span className="text-sm text-gray-600">قضية ناجحة</span>
+                <span className="text-sm text-gray-700">قضية ناجحة</span>
               </div>
             </div>
 
@@ -78,7 +78,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ currentUser, p
                   );
                 })
               ) : (
-                 <div className="text-center text-gray-500 py-6">
+                 <div className="text-center text-gray-600 py-6">
                     <p>لا توجد لديك محادثات بعد.</p>
                 </div>
               )}

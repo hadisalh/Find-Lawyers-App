@@ -31,7 +31,7 @@ export const ChatIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
 
 export const ScaleIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <path d="M12.378 1.602a.75.75 0 00-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03zM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 00.372-.648V7.93zM2.25 7.93v6.54a.75.75 0 00.372.648L11.25 20.16v-9l-9-5.23z" />
+    <path d="M12 2L1 9l4 1v9H3v2h18v-2h-2v-9l4-1L12 2zm0 4.69L17.31 10H6.69L12 6.69z" />
   </svg>
 );
 

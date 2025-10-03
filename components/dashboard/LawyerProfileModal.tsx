@@ -37,14 +37,14 @@ export const LawyerProfileModal: React.FC<LawyerProfileModalProps> = ({ lawyer, 
               <StarIcon className="w-10 h-10 text-yellow-400" />
               <div>
                 <p className="font-extrabold text-2xl text-gray-800">{lawyer.rating.toFixed(1)}</p>
-                <p className="text-md text-gray-600">التقييم العام</p>
+                <p className="text-md text-gray-700">التقييم العام</p>
               </div>
             </div>
              <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
               <BriefcaseIcon className="w-10 h-10 text-green-600" />
               <div>
                 <p className="font-extrabold text-2xl text-gray-800">{lawyer.wonCases}</p>
-                <p className="text-md text-gray-600">قضية ناجحة</p>
+                <p className="text-md text-gray-700">قضية ناجحة</p>
               </div>
             </div>
           </div>
@@ -59,7 +59,7 @@ export const LawyerProfileModal: React.FC<LawyerProfileModalProps> = ({ lawyer, 
                   </blockquote>
                 ))
               ) : (
-                <p className="text-gray-500 text-center py-4">لا توجد مراجعات متاحة حالياً.</p>
+                <p className="text-gray-600 text-center py-4">لا توجد مراجعات متاحة حالياً.</p>
               )}
             </div>
           </div>
