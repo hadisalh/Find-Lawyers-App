@@ -57,7 +57,7 @@ export const ClientDashboard: React.FC<{
   const sidebarContent = (
     <>
       <div className="flex items-center gap-3 mb-10 px-2 hidden md:flex">
-        <ScaleIcon className="w-8 h-8 text-emerald-500" />
+        <ScaleIcon className="w-10 h-10" />
         <h1 className="text-xl font-bold text-white">محامي العراق</h1>
       </div>
       <nav className="flex-grow space-y-2">
