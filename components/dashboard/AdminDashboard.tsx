@@ -2,32 +2,38 @@ import React, { useState } from 'react';
 import { User, Post, Chat, Lawyer, UserRole, LawyerStatus, AccountStatus, Admin } from '../../types';
 import { LawyerVerificationModal } from './LawyerVerificationModal';
 import { LawyerProfileModal } from './LawyerProfileModal';
-import { UserIcon, EyeIcon, TrashIcon, CheckCircleIcon, XCircleIcon, BriefcaseIcon, PlusIcon, LockClosedIcon, PhoneIcon, AtSymbolIcon } from '../ui/icons';
+import { EditAdminModal } from './EditAdminModal';
+import { UserIcon, EyeIcon, TrashIcon, CheckCircleIcon, XCircleIcon, BriefcaseIcon, PlusIcon, LockClosedIcon, PhoneIcon, AtSymbolIcon, PencilIcon } from '../ui/icons';
 
 interface AdminDashboardProps {
+  currentUser: Admin;
   users: User[];
   posts: Post[];
   chats: Chat[];
   onUpdateUser: (updatedUser: User) => void;
   onUpdateUsersBatch: (updatedUsers: User[]) => void;
   onDeletePost: (postId: number) => void;
+  onDeleteUser: (userId: number) => void;
   onViewChat: (chatId: string) => void;
   onRegister: (newUser: User) => void;
   onViewLawyerProfile: (lawyer: Lawyer) => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
+  currentUser,
   users,
   posts,
   chats,
   onUpdateUser,
   onUpdateUsersBatch,
   onDeletePost,
+  onDeleteUser,
   onViewChat,
   onRegister,
   onViewLawyerProfile
 }) => {
   const [verifyingLawyer, setVerifyingLawyer] = useState<Lawyer | null>(null);
+  const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
   const [activeTab, setActiveTab] = useState<'users' | 'requests' | 'posts' | 'chats' | 'admins'>('requests');
   
   // Admin registration form state
@@ -36,6 +42,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [adminPhone, setAdminPhone] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState('');
+
+  const isSuperAdmin = currentUser.email === 'hhhhdddd2017@gmail.com';
 
   const lawyers = users.filter(u => u.role === UserRole.Lawyer) as Lawyer[];
   const pendingLawyers = lawyers.filter(l => l.status === LawyerStatus.Pending);
@@ -204,9 +212,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <h3 className="text-2xl font-bold text-gray-800 mb-4">المشرفون الحاليون</h3>
                         <div className="space-y-3">
                             {admins.map(admin => (
-                                <div key={admin.id} className="bg-white p-4 rounded-lg shadow-sm border">
-                                    <p className="font-bold text-gray-800">{admin.fullName}</p>
-                                    <p className="text-sm text-gray-500">{admin.email}</p>
+                                <div key={admin.id} className="bg-white p-4 rounded-lg shadow-sm border flex justify-between items-center">
+                                    <div>
+                                        <p className="font-bold text-gray-800">{admin.fullName}</p>
+                                        <p className="text-sm text-gray-500">{admin.email}</p>
+                                    </div>
+                                    {isSuperAdmin && admin.id !== currentUser.id && (
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={() => setEditingAdmin(admin as Admin)} className="text-slate-500 hover:text-blue-600 p-1" title="تعديل"><PencilIcon className="w-5 h-5"/></button>
+                                            <button onClick={() => window.confirm('هل أنت متأكد من حذف هذا المشرف؟') && onDeleteUser(admin.id)} className="text-slate-500 hover:text-red-600 p-1" title="حذف"><TrashIcon className="w-5 h-5"/></button>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -248,6 +264,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           lawyer={verifyingLawyer}
           onClose={() => setVerifyingLawyer(null)}
           onStatusChange={handleStatusChange}
+        />
+      )}
+
+      {editingAdmin && (
+        <EditAdminModal
+          admin={editingAdmin}
+          onClose={() => setEditingAdmin(null)}
+          onSave={(updatedAdmin) => {
+            onUpdateUser(updatedAdmin);
+            setEditingAdmin(null);
+          }}
         />
       )}
     </div>

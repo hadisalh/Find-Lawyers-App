@@ -101,7 +101,7 @@ export const Auth: React.FC<AuthProps> = ({ users, onLogin, onRegister }) => {
         setRegisterError('يرجى رفع المستمسكات الثبوتية.');
         return;
       }
-      newUser = { ...baseUser, role: UserRole.Lawyer, specialty: regSpecialty, status: LawyerStatus.Pending, rating: 0, reviews: [], wonCases: 0, idUrl: regIdUrl } as Lawyer;
+      newUser = { ...baseUser, role: UserRole.Lawyer, specialty: regSpecialty, status: LawyerStatus.Pending, rating: 0, reviews: [], wonCases: 0, idUrl: regIdUrl, numberOfRatings: 0 } as Lawyer;
     }
 
     onRegister(newUser);

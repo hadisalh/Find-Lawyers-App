@@ -3,7 +3,7 @@ import { Post, User, Chat, Client, Lawyer, LawyerSpecialty, LawyerStatus, Commen
 import { PostCard } from '../common/PostCard';
 import { EditPostModal } from './EditPostModal';
 // Fix: Imported StarIcon to be used for lawyer ratings.
-import { PlusIcon, UserIcon, ChatIcon, PencilIcon, TrashIcon, HomeIcon, DocumentTextIcon, UsersIcon, StarIcon } from '../ui/icons';
+import { PlusIcon, UserIcon, ChatIcon, PencilIcon, TrashIcon, HomeIcon, DocumentTextIcon, UsersIcon, StarIcon, MagnifyingGlassIcon } from '../ui/icons';
 
 type ClientTab = 'my-posts' | 'all-posts' | 'lawyers' | 'chats';
 
@@ -111,31 +111,50 @@ export const ClientDashboard: React.FC<{
                 <h2 className="text-3xl font-extrabold text-gray-800 mb-6">تصفح المحامين</h2>
                 <div className="bg-white p-4 rounded-lg shadow-md mb-6 sticky top-20 z-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" placeholder="ابحث عن محامي بالاسم..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg"/>
-                        <select value={specialtyFilter} onChange={e => setSpecialtyFilter(e.target.value as any)} className="w-full p-3 border border-gray-300 rounded-lg bg-white">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                                <MagnifyingGlassIcon className="w-5 h-5" />
+                            </div>
+                            <input 
+                                type="text" 
+                                placeholder="ابحث عن محامي بالاسم..." 
+                                value={searchTerm} 
+                                onChange={e => setSearchTerm(e.target.value)} 
+                                className="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                            />
+                        </div>
+                        <select value={specialtyFilter} onChange={e => setSpecialtyFilter(e.target.value as any)} className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                             <option value="all">كل التخصصات</option>
                             {Object.values(LawyerSpecialty).map(spec => <option key={spec} value={spec}>{spec}</option>)}
                         </select>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredLawyers.map(lawyer => (
-                        <div key={lawyer.id} className="bg-white p-5 rounded-xl shadow-lg border text-center flex flex-col">
-                            <div className="bg-slate-100 p-3 rounded-full w-20 h-20 mx-auto -mt-12 border-4 border-white flex items-center justify-center">
-                                <UserIcon className="w-12 h-12 text-slate-500"/>
+                    {filteredLawyers.length > 0 ? (
+                        filteredLawyers.map(lawyer => (
+                            <div key={lawyer.id} className="bg-white p-5 rounded-xl shadow-lg border text-center flex flex-col transition-transform hover:scale-105 hover:shadow-xl">
+                                <div className="bg-slate-100 p-3 rounded-full w-20 h-20 mx-auto -mt-12 border-4 border-white flex items-center justify-center">
+                                    <UserIcon className="w-12 h-12 text-slate-500"/>
+                                </div>
+                                <h3 className="font-bold text-xl mt-4 text-gray-800">{lawyer.fullName}</h3>
+                                <p className="text-blue-600 font-semibold my-1">{lawyer.specialty}</p>
+                                <div className="flex justify-center items-center gap-1 my-2 text-yellow-500">
+                                    {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-5 h-5" filled={i < lawyer.rating} />)}
+                                    <span className="text-gray-600 font-bold ml-1">({lawyer.rating})</span>
+                                </div>
+                                <div className="mt-auto pt-4 flex gap-2">
+                                    <button onClick={() => onViewLawyerProfile(lawyer)} className="w-full bg-slate-200 text-slate-800 font-bold py-2 px-3 rounded-lg hover:bg-slate-300 transition">عرض الملف</button>
+                                    <button onClick={() => onSelectLawyer(lawyer.id)} className="w-full bg-blue-600 text-white font-bold py-2 px-3 rounded-lg hover:bg-blue-700 transition">محادثة</button>
+                                </div>
                             </div>
-                            <h3 className="font-bold text-xl mt-4 text-gray-800">{lawyer.fullName}</h3>
-                            <p className="text-blue-600 font-semibold my-1">{lawyer.specialty}</p>
-                            <div className="flex justify-center items-center gap-1 my-2 text-yellow-500">
-                                {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-5 h-5" filled={i < lawyer.rating} />)}
-                                <span className="text-gray-600 font-bold ml-1">({lawyer.rating})</span>
-                            </div>
-                            <div className="mt-auto pt-4 flex gap-2">
-                                <button onClick={() => onViewLawyerProfile(lawyer)} className="w-full bg-slate-200 text-slate-800 font-bold py-2 px-3 rounded-lg hover:bg-slate-300 transition">عرض الملف</button>
-                                <button onClick={() => onSelectLawyer(lawyer.id)} className="w-full bg-blue-600 text-white font-bold py-2 px-3 rounded-lg hover:bg-blue-700 transition">محادثة</button>
-                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-full text-center py-16 bg-white rounded-lg shadow-md border">
+                            <MagnifyingGlassIcon className="mx-auto h-12 w-12 text-gray-400" />
+                            <h3 className="mt-4 text-lg font-semibold text-gray-800">لم يتم العثور على محامين</h3>
+                            <p className="mt-1 text-sm text-gray-500">جرّب تعديل مصطلحات البحث أو تغيير الفلتر.</p>
                         </div>
-                    ))}
+                    )}
                 </div>
             </>
         );

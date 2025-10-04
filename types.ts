@@ -44,6 +44,7 @@ export interface Lawyer extends User {
   status: LawyerStatus;
   rating: number;
   reviews: string[];
+  numberOfRatings: number;
   wonCases: number;
   idUrl: string; // URL to the ID document
 }

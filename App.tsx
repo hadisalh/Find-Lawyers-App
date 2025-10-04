@@ -6,7 +6,7 @@ import { LawyerDashboard } from './components/dashboard/LawyerDashboard';
 import { ClientDashboard } from './components/dashboard/ClientDashboard';
 import { ChatWindow } from './components/chat/ChatWindow';
 import { Disclaimer } from './components/Disclaimer';
-import { User, Post, Chat, Comment, UserRole, Lawyer, Client, ChatMessage } from './types';
+import { User, Post, Chat, Comment, UserRole, Lawyer, Client, ChatMessage, Admin } from './types';
 import { USERS, POSTS, CHATS } from './constants';
 import { LawyerProfileModal } from './components/dashboard/LawyerProfileModal';
 
@@ -57,6 +57,10 @@ const App: React.FC = () => {
       setUsers(prevUsers => prevUsers.map(u => updatedUserMap.get(u.id) || u));
   }
   
+  const handleDeleteUser = (userId: number) => {
+      setUsers(prevUsers => prevUsers.filter(u => u.id !== userId));
+  }
+
   const handleAddPost = (postData: Omit<Post, 'id' | 'createdAt' | 'comments'>) => {
     const newPost: Post = {
         ...postData,
@@ -108,14 +112,17 @@ const App: React.FC = () => {
     setUsers(prevUsers => prevUsers.map(user => {
       if (user.id === lawyerId && user.role === UserRole.Lawyer) {
         const lawyer = user as Lawyer;
-        const newReviews = review ? [...lawyer.reviews, review] : lawyer.reviews;
-        const totalRatingPoints = (lawyer.rating * lawyer.reviews.length) + rating;
-        const newAverageRating = totalRatingPoints / (lawyer.reviews.length + 1);
+        const newReviews = review.trim() ? [...lawyer.reviews, review.trim()] : lawyer.reviews;
+        
+        const totalRatingPoints = (lawyer.rating * lawyer.numberOfRatings) + rating;
+        const newNumberOfRatings = lawyer.numberOfRatings + 1;
+        const newAverageRating = newNumberOfRatings > 0 ? totalRatingPoints / newNumberOfRatings : 0;
         
         return {
           ...lawyer,
           reviews: newReviews,
           rating: parseFloat(newAverageRating.toFixed(1)),
+          numberOfRatings: newNumberOfRatings,
         };
       }
       return user;
@@ -128,7 +135,7 @@ const App: React.FC = () => {
     if (!currentUser) return null;
     switch (currentUser.role) {
       case UserRole.Admin:
-        return <AdminDashboard users={users} posts={posts} chats={chats} onUpdateUser={handleUpdateUser} onUpdateUsersBatch={handleUpdateUsersBatch} onDeletePost={handleDeletePost} onViewChat={setAdminViewingChatId} onRegister={handleRegister} onViewLawyerProfile={setViewingLawyerProfile} />;
+        return <AdminDashboard currentUser={currentUser as Admin} users={users} posts={posts} chats={chats} onUpdateUser={handleUpdateUser} onUpdateUsersBatch={handleUpdateUsersBatch} onDeletePost={handleDeletePost} onDeleteUser={handleDeleteUser} onViewChat={setAdminViewingChatId} onRegister={handleRegister} onViewLawyerProfile={setViewingLawyerProfile} />;
       case UserRole.Lawyer:
         return <LawyerDashboard currentUser={currentUser as Lawyer} posts={posts} chats={chats} users={users} onCommentSubmit={handleCommentSubmit} onChatIconClick={setActiveChatId}/>;
       case UserRole.Client:

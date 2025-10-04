@@ -7,9 +7,9 @@ export const USERS: User[] = [
 
 
   // Lawyers
-  { id: 2, email: 'lawyer1@app.com', fullName: 'المحامي علي', role: UserRole.Lawyer, specialty: LawyerSpecialty.Criminal, status: LawyerStatus.Approved, rating: 4.8, reviews: ['ممتاز', 'سريع'], wonCases: 25, idUrl: '#', password: 'password123', accountStatus: AccountStatus.Active } as Lawyer,
-  { id: 3, email: 'lawyer2@app.com', fullName: 'المحامية فاطمة', role: UserRole.Lawyer, specialty: LawyerSpecialty.Family, status: LawyerStatus.Approved, rating: 4.9, reviews: ['متعاونة جدا'], wonCases: 40, idUrl: '#', password: 'password123', accountStatus: AccountStatus.Active } as Lawyer,
-  { id: 4, email: 'lawyer3@app.com', fullName: 'المحامي أحمد', role: UserRole.Lawyer, specialty: LawyerSpecialty.Civil, status: LawyerStatus.Pending, rating: 0, reviews: [], wonCases: 0, idUrl: '#', password: 'password123', accountStatus: AccountStatus.Active } as Lawyer,
+  { id: 2, email: 'lawyer1@app.com', fullName: 'المحامي علي', role: UserRole.Lawyer, specialty: LawyerSpecialty.Criminal, status: LawyerStatus.Approved, rating: 4.8, reviews: ['ممتاز', 'سريع'], wonCases: 25, idUrl: '#', password: 'password123', accountStatus: AccountStatus.Active, numberOfRatings: 5 } as Lawyer,
+  { id: 3, email: 'lawyer2@app.com', fullName: 'المحامية فاطمة', role: UserRole.Lawyer, specialty: LawyerSpecialty.Family, status: LawyerStatus.Approved, rating: 4.9, reviews: ['متعاونة جدا'], wonCases: 40, idUrl: '#', password: 'password123', accountStatus: AccountStatus.Active, numberOfRatings: 12 } as Lawyer,
+  { id: 4, email: 'lawyer3@app.com', fullName: 'المحامي أحمد', role: UserRole.Lawyer, specialty: LawyerSpecialty.Civil, status: LawyerStatus.Pending, rating: 0, reviews: [], wonCases: 0, idUrl: '#', password: 'password123', accountStatus: AccountStatus.Active, numberOfRatings: 0 } as Lawyer,
   
   // Clients
   { id: 5, email: 'client1@app.com', fullName: 'العميل خالد', role: UserRole.Client, phone: '07811111111', password: 'password123', accountStatus: AccountStatus.Active } as Client,
