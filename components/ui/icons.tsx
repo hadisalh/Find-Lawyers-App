@@ -123,3 +123,28 @@ export const MagnifyingGlassIcon: React.FC<IconProps> = (props) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
     </svg>
 );
+
+export const ChartPieIcon: React.FC<IconProps> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+    </svg>
+);
+
+export const Cog6ToothIcon: React.FC<IconProps> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-1.003 1.11-1.226.554-.223 1.19-.223 1.745 0 .55.223 1.02.684 1.11 1.226l.082.499a1.5 1.5 0 001.488 1.168h.549c.562 0 1.08.322 1.344.833.262.51.157 1.12-.262 1.516l-.42.399a1.5 1.5 0 00-.51 1.634l.24 1.099c.145.66.023 1.36-1.028 1.63-1.05.27-2.122-.162-2.458-1.182l-.134-.413a1.5 1.5 0 00-1.487-1.168h-.55c-1.022 0-1.85-.828-1.85-1.85v-.55a1.5 1.5 0 00-1.488-1.168l-.413-.134c-1.02-.336-1.452-1.388-1.182-2.458.27-1.051 1.27-1.874 2.32-1.63l1.1.24a1.5 1.5 0 001.633-.51l.4-.42c.4-.42.99-.617 1.52-.355.53.262.85.782.85 1.343v.549a1.5 1.5 0 001.168 1.488l.499.082z" />
+    </svg>
+);
+
+export const Bars3Icon: React.FC<IconProps> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+    </svg>
+);
+
+export const XMarkIcon: React.FC<IconProps> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+);

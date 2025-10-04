@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Post, Comment, User, Chat, Lawyer } from '../../types';
 import { PostCard } from '../common/PostCard';
-import { UserIcon, BriefcaseIcon, StarIcon, UsersIcon, ChatIcon, DocumentTextIcon } from '../ui/icons';
+import { DashboardLayout } from './DashboardLayout';
+import { UserIcon, BriefcaseIcon, StarIcon, ChatIcon, DocumentTextIcon, ScaleIcon, ArrowLeftOnRectangleIcon } from '../ui/icons';
 
 interface LawyerDashboardProps {
   currentUser: Lawyer;
@@ -10,26 +11,30 @@ interface LawyerDashboardProps {
   users: User[];
   onCommentSubmit: (postId: number, comment: Comment) => void;
   onChatIconClick: (chatId: string) => void;
+  onLogout: () => void;
 }
 
-const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number }> = ({ icon, label, value }) => (
-  <div className="bg-white p-4 rounded-xl shadow-md border border-slate-200 flex items-center gap-4 transition-transform hover:scale-105 hover:shadow-lg">
-    <div className="bg-blue-100 text-blue-600 p-3 rounded-full">
+type LawyerView = 'posts' | 'chats';
+
+const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; color: string }> = ({ icon, label, value, color }) => (
+  <div className="bg-white p-5 rounded-xl shadow-md border border-slate-200 flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-lg">
+    <div className={`text-white p-4 rounded-full ${color}`}>
       {icon}
     </div>
     <div>
-      <p className="text-sm font-semibold text-gray-600">{label}</p>
-      <p className="text-2xl font-extrabold text-gray-800">{value}</p>
+      <p className="text-sm font-semibold text-slate-500">{label}</p>
+      <p className="text-2xl font-extrabold text-slate-800">{value}</p>
     </div>
   </div>
 );
 
-const TabButton: React.FC<{icon: React.ReactNode; label: string; isActive: boolean; onClick: () => void;}> = ({ icon, label, isActive, onClick }) => (
-    <button onClick={onClick} className={`flex items-center gap-3 px-4 py-3 font-bold rounded-lg transition-colors ${isActive ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-600 hover:bg-slate-200'}`}>
+const SidebarLink: React.FC<{icon: React.ReactNode; label: string; isActive: boolean; onClick: () => void;}> = ({ icon, label, isActive, onClick }) => (
+    <button onClick={onClick} className={`flex items-center w-full text-right gap-3 px-4 py-3 font-bold rounded-lg transition-colors ${isActive ? 'bg-emerald-500 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}>
         {icon}
         <span>{label}</span>
     </button>
 );
+
 
 export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({
   currentUser,
@@ -38,16 +43,43 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({
   users,
   onCommentSubmit,
   onChatIconClick,
+  onLogout
 }) => {
-  const [activeTab, setActiveTab] = useState<'posts' | 'chats'>('posts');
+  const [activeView, setActiveView] = useState<LawyerView>('posts');
   const lawyerChats = chats.filter(c => c.lawyerId === currentUser.id);
 
+  const sidebarContent = (
+    <>
+      <div className="flex items-center gap-3 mb-10 px-2 hidden md:flex">
+        <ScaleIcon className="w-8 h-8 text-emerald-500" />
+        <h1 className="text-xl font-bold text-white">محامي العراق</h1>
+      </div>
+      <nav className="flex-grow space-y-2">
+        <SidebarLink icon={<DocumentTextIcon className="w-5 h-5"/>} label="الاستشارات" isActive={activeView === 'posts'} onClick={() => setActiveView('posts')} />
+        <SidebarLink icon={<ChatIcon className="w-5 h-5"/>} label="محادثاتي" isActive={activeView === 'chats'} onClick={() => setActiveView('chats')} />
+      </nav>
+      <div className="mt-auto">
+        <div className="border-t border-slate-700 py-4 px-2">
+          <p className="text-sm text-slate-300">أهلاً بك،</p>
+          <p className="font-bold text-white">{currentUser.fullName}</p>
+        </div>
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 font-bold rounded-lg bg-slate-800 text-slate-300 hover:bg-red-500/20 hover:text-red-400 transition-colors"
+        >
+          <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+          <span>تسجيل الخروج</span>
+        </button>
+      </div>
+    </>
+  );
+
   const renderContent = () => {
-    switch(activeTab) {
+    switch(activeView) {
       case 'posts':
         return (
           <>
-            <h2 className="text-3xl font-extrabold text-gray-800 mb-6">استشارات العملاء المتاحة</h2>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 mb-6">استشارات العملاء المتاحة</h2>
             {posts.length > 0 ? (
               posts.map(post => (
                 <PostCard
@@ -59,8 +91,8 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({
                 />
               ))
             ) : (
-              <div className="text-center py-16 bg-white rounded-lg shadow-md">
-                  <p className="text-gray-600 text-lg">لا توجد استشارات منشورة حاليًا.</p>
+              <div className="text-center py-16 bg-white rounded-lg shadow-md border">
+                  <p className="text-slate-600 text-lg">لا توجد استشارات منشورة حاليًا.</p>
               </div>
             )}
           </>
@@ -68,10 +100,10 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({
       case 'chats':
         return (
           <>
-            <h2 className="text-3xl font-extrabold text-gray-800 mb-6">محادثاتي</h2>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 mb-6">محادثاتي</h2>
             <div className="bg-white p-4 rounded-xl shadow-lg border">
                 {lawyerChats.length > 0 ? (
-                  <ul className="space-y-2">
+                  <ul className="divide-y divide-slate-200">
                     {lawyerChats.map(chat => {
                       const client = users.find(u => u.id === chat.clientId);
                       if (!client) return null;
@@ -82,12 +114,12 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({
                             <UserIcon className="w-7 h-7 text-slate-600"/>
                           </div>
                           <div className="flex-grow">
-                              <p className="font-bold text-lg text-gray-800">{client.fullName}</p>
-                              <p className="text-md text-gray-600 truncate max-w-xs sm:max-w-md">
+                              <p className="font-bold text-lg text-slate-800">{client.fullName}</p>
+                              <p className="text-md text-slate-500 truncate max-w-xs sm:max-w-md">
                                 {lastMessage ? `${lastMessage.senderId === currentUser.id ? 'أنت: ' : ''}${lastMessage.text}` : 'ابدأ المحادثة...'}
                               </p>
                           </div>
-                           <div className="text-xs text-gray-500 ml-auto whitespace-nowrap">
+                           <div className="text-xs text-slate-500 ml-auto whitespace-nowrap">
                               {lastMessage && new Date(lastMessage.timestamp).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit'})}
                            </div>
                         </li>
@@ -95,7 +127,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({
                     })}
                   </ul>
                 ) : (
-                  <p className="text-center text-gray-600 py-10">
+                  <p className="text-center text-slate-500 py-10">
                     لا توجد محادثات. قدم عرضًا على استشارة لبدء محادثة.
                   </p>
                 )}
@@ -106,32 +138,22 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-       {/* Welcome Header */}
+    <DashboardLayout sidebar={sidebarContent}>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">أهلاً بعودتك، {currentUser.fullName}</h1>
-        <p className="text-md text-gray-600">هنا ملخص نشاطك وأحدث الاستشارات المتاحة.</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-800">أهلاً بعودتك، {currentUser.fullName}</h1>
+        <p className="text-md text-slate-500">هنا ملخص نشاطك وأحدث الاستشارات المتاحة.</p>
       </div>
       
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard icon={<BriefcaseIcon className="w-6 h-6"/>} label="القضايا الرابحة" value={currentUser.wonCases} />
-        <StatCard icon={<StarIcon className="w-6 h-6"/>} label="متوسط التقييم" value={`${currentUser.rating} / 5`} />
-        <StatCard icon={<UsersIcon className="w-6 h-6"/>} label="إجمالي التقييمات" value={currentUser.numberOfRatings} />
-        <StatCard icon={<ChatIcon className="w-6 h-6"/>} label="محادثات نشطة" value={lawyerChats.length} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+        <StatCard icon={<BriefcaseIcon className="w-6 h-6"/>} label="القضايا الرابحة" value={currentUser.wonCases} color="bg-blue-500" />
+        <StatCard icon={<StarIcon className="w-6 h-6"/>} label="متوسط التقييم" value={`${currentUser.rating} / 5`} color="bg-amber-500" />
+        <StatCard icon={<ChatIcon className="w-6 h-6"/>} label="محادثات نشطة" value={lawyerChats.length} color="bg-violet-500" />
+        <StatCard icon={<UserIcon className="w-6 h-6"/>} label="إجمالي التقييمات" value={currentUser.numberOfRatings} color="bg-pink-500" />
       </div>
 
-      {/* Tabs */}
-      <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-2 mb-8 flex flex-wrap justify-center gap-2 sticky top-20 z-20">
-        <TabButton icon={<DocumentTextIcon className="w-5 h-5"/>} label="الاستشارات المتاحة" isActive={activeTab === 'posts'} onClick={() => setActiveTab('posts')} />
-        <TabButton icon={<ChatIcon className="w-5 h-5"/>} label="محادثاتي" isActive={activeTab === 'chats'} onClick={() => setActiveTab('chats')} />
-      </div>
-
-      {/* Tab Content */}
       <div>
         {renderContent()}
       </div>
-
-    </div>
+    </DashboardLayout>
   );
 };

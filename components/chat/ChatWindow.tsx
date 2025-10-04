@@ -45,18 +45,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, currentUser, other
   }
 
   return (
-    <div className="fixed bottom-0 right-0 sm:right-4 md:right-10 w-full sm:w-96 h-full sm:h-[550px] bg-white border border-gray-200 rounded-t-2xl shadow-2xl flex flex-col z-40 transform-gpu">
-      <header className="bg-slate-800 text-white p-3 flex justify-between items-center rounded-t-2xl shadow-md">
+    <div className="fixed bottom-0 right-0 sm:right-4 md:right-10 w-full sm:w-96 h-full sm:h-[550px] bg-white border border-slate-200 rounded-t-2xl shadow-2xl flex flex-col z-40 transform-gpu">
+      <header className="bg-slate-900 text-white p-3 flex justify-between items-center rounded-t-2xl shadow-md">
         <h3 className="font-bold text-lg">{otherUserName}</h3>
         <button onClick={onClose} className="text-slate-300 hover:text-white text-3xl font-light leading-none">&times;</button>
       </header>
       
-      <div className="flex-1 p-4 overflow-y-auto bg-slate-100">
+      <div className="flex-1 p-4 overflow-y-auto bg-slate-100 custom-scrollbar">
         {chat.messages.map(msg => (
           <div key={msg.id} className={`flex mb-3 ${isMyMessage(msg) ? 'justify-end' : 'justify-start'}`}>
-            <div className={`rounded-2xl py-2 px-4 max-w-[80%] ${isMyMessage(msg) ? 'bg-blue-600 text-white rounded-br-none' : 'bg-slate-200 text-gray-800 rounded-bl-none'}`}>
+            <div className={`rounded-2xl py-2 px-4 max-w-[80%] ${isMyMessage(msg) ? 'bg-emerald-500 text-white rounded-br-none' : 'bg-white text-slate-800 rounded-bl-none shadow-sm'}`}>
               <p className="text-md">{msg.text}</p>
-              <p className={`text-xs mt-1 text-right ${isMyMessage(msg) ? 'text-blue-200' : 'text-gray-600'}`}>
+              <p className={`text-xs mt-1 text-right ${isMyMessage(msg) ? 'text-emerald-100' : 'text-slate-400'}`}>
                 {new Date(msg.timestamp).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
@@ -66,16 +66,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, currentUser, other
       </div>
       
       {!isReadOnly ? (
-        <form onSubmit={handleSendMessage} className="p-3 border-t border-gray-200 bg-white">
+        <form onSubmit={handleSendMessage} className="p-3 border-t border-slate-200 bg-white">
           <div className="flex items-center gap-2">
             <input
               type="text"
               value={newMessage}
               onChange={e => setNewMessage(e.target.value)}
               placeholder="اكتب رسالتك..."
-              className="flex-1 p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="flex-1 p-3 border border-slate-300 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
             />
-            <button type="submit" className="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-all transform hover:scale-110 flex-shrink-0" aria-label="إرسال">
+            <button type="submit" className="bg-emerald-500 text-white p-3 rounded-full hover:bg-emerald-600 transition-all transform hover:scale-110 flex-shrink-0" aria-label="إرسال">
               <PaperAirplaneIcon className="w-6 h-6"/>
             </button>
           </div>

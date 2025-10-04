@@ -10,7 +10,7 @@ interface AuthProps {
 
 const InputField: React.FC<{icon: React.ReactNode, children: React.ReactNode}> = ({ icon, children }) => (
     <div className="relative">
-        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
             {icon}
         </div>
         {children}
@@ -110,52 +110,55 @@ export const Auth: React.FC<AuthProps> = ({ users, onLogin, onRegister }) => {
     setRegFullName(''); setRegEmail(''); setRegPhone(''); setRegPassword(''); setRegSpecialty(LawyerSpecialty.Civil); setRegIdUrl('');
   };
 
+  const commonInputClasses = "w-full p-3 pr-12 bg-slate-100 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition";
+  const primaryButtonClasses = "w-full bg-emerald-500 text-white font-bold py-3 rounded-lg hover:bg-emerald-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-300";
+
   const renderLoginForm = () => (
     <form onSubmit={handleLogin} className="space-y-6">
-      <h2 className="text-3xl font-extrabold text-center text-gray-800">تسجيل الدخول</h2>
+      <h2 className="text-3xl font-extrabold text-center text-slate-800">تسجيل الدخول</h2>
       {loginError && <p className="bg-red-100 text-red-700 p-3 rounded-lg text-center font-semibold">{loginError}</p>}
-      <InputField icon={<AtSymbolIcon />}>
-        <input type="text" value={loginIdentifier} onChange={e => setLoginIdentifier(e.target.value)} placeholder="البريد الإلكتروني أو رقم الهاتف" className="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" required />
+      <InputField icon={<AtSymbolIcon className="w-5 h-5" />}>
+        <input type="text" value={loginIdentifier} onChange={e => setLoginIdentifier(e.target.value)} placeholder="البريد الإلكتروني أو رقم الهاتف" className={commonInputClasses} required />
       </InputField>
-      <InputField icon={<LockClosedIcon />}>
-        <input type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} placeholder="كلمة المرور" className="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" required />
+      <InputField icon={<LockClosedIcon className="w-5 h-5" />}>
+        <input type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} placeholder="كلمة المرور" className={commonInputClasses} required />
       </InputField>
-      <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">دخول</button>
-      <p className="text-center mt-4 text-gray-600">
-        ليس لديك حساب؟ <button type="button" onClick={() => setIsLoginView(false)} className="font-semibold text-blue-600 hover:underline">سجل الآن</button>
+      <button type="submit" className={primaryButtonClasses}>دخول</button>
+      <p className="text-center mt-4 text-slate-600">
+        ليس لديك حساب؟ <button type="button" onClick={() => setIsLoginView(false)} className="font-semibold text-emerald-600 hover:underline">سجل الآن</button>
       </p>
     </form>
   );
 
   const renderRegisterForm = () => (
     <form onSubmit={handleRegister} className="space-y-4">
-        <h2 className="text-3xl font-extrabold text-center text-gray-800">إنشاء حساب جديد</h2>
+        <h2 className="text-3xl font-extrabold text-center text-slate-800">إنشاء حساب جديد</h2>
         {registerError && <p className="bg-red-100 text-red-700 p-3 rounded-lg mb-4 text-center font-semibold">{registerError}</p>}
         <div className="flex justify-center bg-slate-100 p-1 rounded-lg">
-            <button type="button" onClick={() => setRegisterAs('client')} className={`w-1/2 py-2 px-4 font-bold rounded-md transition-colors ${registerAs === 'client' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>عميل</button>
-            <button type="button" onClick={() => setRegisterAs('lawyer')} className={`w-1/2 py-2 px-4 font-bold rounded-md transition-colors ${registerAs === 'lawyer' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>محامي</button>
+            <button type="button" onClick={() => setRegisterAs('client')} className={`w-1/2 py-2 px-4 font-bold rounded-md transition-all duration-300 ${registerAs === 'client' ? 'bg-white shadow-md text-emerald-600' : 'text-slate-500'}`}>عميل</button>
+            <button type="button" onClick={() => setRegisterAs('lawyer')} className={`w-1/2 py-2 px-4 font-bold rounded-md transition-all duration-300 ${registerAs === 'lawyer' ? 'bg-white shadow-md text-emerald-600' : 'text-slate-500'}`}>محامي</button>
         </div>
         
-        <InputField icon={<UserIcon className="w-5 h-5"/>}><input value={regFullName} onChange={e => setRegFullName(e.target.value)} placeholder="الاسم الثلاثي" className="w-full p-3 pr-10 border border-gray-300 rounded-lg" required /></InputField>
-        <InputField icon={<PhoneIcon />}><input value={regPhone} onChange={e => setRegPhone(e.target.value)} placeholder="رقم الهاتف" className="w-full p-3 pr-10 border border-gray-300 rounded-lg" required /></InputField>
-        <InputField icon={<AtSymbolIcon />}><input type="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} placeholder="البريد الإلكتروني" className="w-full p-3 pr-10 border border-gray-300 rounded-lg" required /></InputField>
-        <InputField icon={<LockClosedIcon />}><input type="password" value={regPassword} onChange={e => setRegPassword(e.target.value)} placeholder="كلمة المرور" className="w-full p-3 pr-10 border border-gray-300 rounded-lg" required /></InputField>
+        <InputField icon={<UserIcon className="w-5 h-5"/>}><input value={regFullName} onChange={e => setRegFullName(e.target.value)} placeholder="الاسم الثلاثي" className={commonInputClasses} required /></InputField>
+        <InputField icon={<PhoneIcon className="w-5 h-5" />}><input value={regPhone} onChange={e => setRegPhone(e.target.value)} placeholder="رقم الهاتف" className={commonInputClasses} required /></InputField>
+        <InputField icon={<AtSymbolIcon className="w-5 h-5" />}><input type="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} placeholder="البريد الإلكتروني" className={commonInputClasses} required /></InputField>
+        <InputField icon={<LockClosedIcon className="w-5 h-5" />}><input type="password" value={regPassword} onChange={e => setRegPassword(e.target.value)} placeholder="كلمة المرور" className={commonInputClasses} required /></InputField>
         
         {registerAs === 'lawyer' && (
             <>
-                <select value={regSpecialty} onChange={e => setRegSpecialty(e.target.value as LawyerSpecialty)} className="w-full p-3 border border-gray-300 rounded-lg bg-white appearance-none">
+                <select value={regSpecialty} onChange={e => setRegSpecialty(e.target.value as LawyerSpecialty)} className={`${commonInputClasses} pr-4 appearance-none`}>
                     {Object.values(LawyerSpecialty).map(spec => <option key={spec} value={spec}>{spec}</option>)}
                 </select>
                 <div>
-                    <label className="block text-sm font-semibold text-gray-600 mb-2">رفع المستمسكات الثبوتية (بطاقة/هوية)</label>
-                    <input type="file" onChange={(e) => { if (e.target.files?.length) { setRegIdUrl(URL.createObjectURL(e.target.files[0])); } }} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required />
+                    <label className="block text-sm font-semibold text-slate-600 mb-2">رفع المستمسكات الثبوتية (بطاقة/هوية)</label>
+                    <input type="file" onChange={(e) => { if (e.target.files?.length) { setRegIdUrl(URL.createObjectURL(e.target.files[0])); } }} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" required />
                 </div>
             </>
         )}
         
-        <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">تسجيل</button>
-         <p className="text-center mt-4 text-gray-600">
-            لديك حساب بالفعل؟ <button type="button" onClick={() => setIsLoginView(true)} className="font-semibold text-blue-600 hover:underline">سجل الدخول</button>
+        <button type="submit" className={primaryButtonClasses}>تسجيل</button>
+         <p className="text-center mt-4 text-slate-600">
+            لديك حساب بالفعل؟ <button type="button" onClick={() => setIsLoginView(true)} className="font-semibold text-emerald-600 hover:underline">سجل الدخول</button>
         </p>
     </form>
   );
@@ -163,10 +166,10 @@ export const Auth: React.FC<AuthProps> = ({ users, onLogin, onRegister }) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-100 p-4">
         <div className="flex items-center gap-3 mb-8">
-            <ScaleIcon className="w-12 h-12 text-blue-600" />
-            <h1 className="text-4xl font-extrabold text-gray-800">محامي العراق</h1>
+            <ScaleIcon className="w-12 h-12 text-emerald-500" />
+            <h1 className="text-4xl font-extrabold text-slate-800">محامي العراق</h1>
         </div>
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
         {isLoginView ? renderLoginForm() : renderRegisterForm()}
       </div>
     </div>

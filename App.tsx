@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Auth } from './components/Auth';
-import { Header } from './components/common/Header';
 import { AdminDashboard } from './components/dashboard/AdminDashboard';
 import { LawyerDashboard } from './components/dashboard/LawyerDashboard';
 import { ClientDashboard } from './components/dashboard/ClientDashboard';
@@ -9,6 +8,7 @@ import { Disclaimer } from './components/Disclaimer';
 import { User, Post, Chat, Comment, UserRole, Lawyer, Client, ChatMessage, Admin } from './types';
 import { USERS, POSTS, CHATS } from './constants';
 import { LawyerProfileModal } from './components/dashboard/LawyerProfileModal';
+import { EditUserModal } from './components/dashboard/EditUserModal';
 
 const App: React.FC = () => {
   const [disclaimerAgreed, setDisclaimerAgreed] = useState<boolean>(() => JSON.parse(localStorage.getItem('disclaimerAgreed') || 'false'));
@@ -23,6 +23,7 @@ const App: React.FC = () => {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [adminViewingChatId, setAdminViewingChatId] = useState<string | null>(null);
   const [viewingLawyerProfile, setViewingLawyerProfile] = useState<Lawyer | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   useEffect(() => {
     if (currentUser) {
@@ -50,6 +51,10 @@ const App: React.FC = () => {
   
   const handleUpdateUser = (updatedUser: User) => {
     setUsers(prevUsers => prevUsers.map(u => u.id === updatedUser.id ? updatedUser : u));
+    // Also update current user if they are the one being edited
+    if (currentUser && currentUser.id === updatedUser.id) {
+        setCurrentUser(updatedUser);
+    }
   }
 
   const handleUpdateUsersBatch = (updatedUsers: User[]) => {
@@ -135,11 +140,11 @@ const App: React.FC = () => {
     if (!currentUser) return null;
     switch (currentUser.role) {
       case UserRole.Admin:
-        return <AdminDashboard currentUser={currentUser as Admin} users={users} posts={posts} chats={chats} onUpdateUser={handleUpdateUser} onUpdateUsersBatch={handleUpdateUsersBatch} onDeletePost={handleDeletePost} onDeleteUser={handleDeleteUser} onViewChat={setAdminViewingChatId} onRegister={handleRegister} onViewLawyerProfile={setViewingLawyerProfile} />;
+        return <AdminDashboard currentUser={currentUser as Admin} users={users} posts={posts} chats={chats} onUpdateUser={handleUpdateUser} onUpdateUsersBatch={handleUpdateUsersBatch} onDeletePost={handleDeletePost} onDeleteUser={handleDeleteUser} onViewChat={setAdminViewingChatId} onRegister={handleRegister} onViewLawyerProfile={setViewingLawyerProfile} onLogout={handleLogout} onEditUser={setEditingUser} />;
       case UserRole.Lawyer:
-        return <LawyerDashboard currentUser={currentUser as Lawyer} posts={posts} chats={chats} users={users} onCommentSubmit={handleCommentSubmit} onChatIconClick={setActiveChatId}/>;
+        return <LawyerDashboard currentUser={currentUser as Lawyer} posts={posts} chats={chats} users={users} onCommentSubmit={handleCommentSubmit} onChatIconClick={setActiveChatId} onLogout={handleLogout}/>;
       case UserRole.Client:
-        return <ClientDashboard currentUser={currentUser as Client} posts={posts} chats={chats} users={users} onAddPost={handleAddPost} onUpdatePost={handleUpdatePost} onDeletePost={handleDeletePost} onCommentSubmit={handleCommentSubmit} onSelectLawyer={handleSelectLawyer} onChatIconClick={setActiveChatId} onViewLawyerProfile={setViewingLawyerProfile}/>;
+        return <ClientDashboard currentUser={currentUser as Client} posts={posts} chats={chats} users={users} onAddPost={handleAddPost} onUpdatePost={handleUpdatePost} onDeletePost={handleDeletePost} onCommentSubmit={handleCommentSubmit} onSelectLawyer={handleSelectLawyer} onChatIconClick={setActiveChatId} onViewLawyerProfile={setViewingLawyerProfile} onLogout={handleLogout}/>;
       default:
         return <div>Unknown user role</div>;
     }
@@ -153,15 +158,13 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen font-sans">
+    <div className="bg-slate-100 min-h-screen">
       {!currentUser ? (
         <Auth users={users} onLogin={handleLogin} onRegister={handleRegister} />
       ) : (
         <>
-          <Header user={currentUser} onLogout={handleLogout} />
-          <main>
-            {renderDashboard()}
-          </main>
+          {renderDashboard()}
+
           {activeChat && (
               <ChatWindow 
                 chat={activeChat}
@@ -192,6 +195,16 @@ const App: React.FC = () => {
                 currentUser={currentUser}
                 onRateLawyer={handleRateLawyer}
               />
+          )}
+          {editingUser && (
+            <EditUserModal 
+              user={editingUser}
+              onClose={() => setEditingUser(null)}
+              onSave={(updatedUser) => {
+                handleUpdateUser(updatedUser);
+                setEditingUser(null);
+              }}
+            />
           )}
         </>
       )}
