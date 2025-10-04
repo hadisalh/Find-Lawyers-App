@@ -166,7 +166,7 @@ export const Auth: React.FC<AuthProps> = ({ users, onLogin, onRegister }) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-100 p-4">
         <div className="flex items-center gap-3 mb-8">
-            <ScaleIcon className="w-16 h-16" />
+            <ScaleIcon className="w-12 h-12 text-emerald-500" />
             <h1 className="text-4xl font-extrabold text-slate-800">محامي العراق</h1>
         </div>
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">

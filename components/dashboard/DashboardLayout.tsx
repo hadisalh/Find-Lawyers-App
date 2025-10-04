@@ -36,13 +36,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ sidebar, child
       <div className="flex-1 flex flex-col md:mr-64">
         {/* Mobile Header */}
         <header className="md:hidden bg-white shadow-sm sticky top-0 z-30 p-4 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-                <ScaleIcon className="w-8 h-8" />
-                <h1 className="text-lg font-bold text-slate-800">محامي العراق</h1>
-            </div>
-             <button onClick={() => setIsSidebarOpen(true)} className="text-slate-600 hover:text-emerald-500">
+            <button onClick={() => setIsSidebarOpen(true)} className="text-slate-600 hover:text-emerald-500">
                 <Bars3Icon className="w-7 h-7" />
             </button>
+            <div className="flex items-center gap-2">
+                <ScaleIcon className="w-7 h-7 text-emerald-500" />
+                <h1 className="text-lg font-bold text-slate-800">محامي العراق</h1>
+            </div>
         </header>
         
         {/* Main Content */}
