@@ -27,7 +27,7 @@ interface AdminDashboardProps {
   onEditUser: (user: User) => void;
   onResolveReport: (reportId: number) => void;
   onCommentSubmit: (postId: number, comment: Comment) => void;
-  onReport: (type: 'user' | 'post', id: number, name: string) => void;
+  onReport: (type: 'user' | 'post' | 'message', id: number, name: string) => void;
 }
 
 type AdminView = 'dashboard' | 'users' | 'posts' | 'reports' | 'chats' | 'settings';
@@ -53,6 +53,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
   const [activeView, setActiveView] = useState<AdminView>('dashboard');
   const [verifyingLawyer, setVerifyingLawyer] = useState<Lawyer | null>(null);
   const [viewingReportedPost, setViewingReportedPost] = useState<Post | null>(null);
+  const [showAddPostForm, setShowAddPostForm] = useState(false);
 
   const stats = useMemo(() => {
     return {
@@ -68,7 +69,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
   const handleLawyerStatusChange = (lawyerId: number, newStatus: LawyerStatus) => {
     const lawyer = props.users.find(u => u.id === lawyerId) as Lawyer;
     if(lawyer) {
-        props.onUpdateUser({ ...lawyer, status: newStatus });
+        // Fix: Explicitly create a new Lawyer object to avoid TypeScript error with excess properties on User type.
+        const updatedLawyer: Lawyer = { ...lawyer, status: newStatus };
+        props.onUpdateUser(updatedLawyer);
     }
   };
 
@@ -77,7 +80,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
   }
 
   const handleViewReport = (report: Report) => {
-    if (report.type === 'user') {
+    if (report.type === 'message' && report.context?.chatId) {
+        props.onViewChat(report.context.chatId);
+    } else if (report.type === 'user') {
         const user = props.users.find(u => u.id === report.targetId);
         if (user) {
             if (user.role === UserRole.Lawyer) {
@@ -225,7 +230,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
                              {props.reports.map(report => (
                                  <tr key={report.id}>
                                      <td className="p-4 whitespace-nowrap font-bold">{report.targetContentPreview}</td>
-                                     <td className="p-4 whitespace-nowrap">{report.type === 'post' ? 'منشور' : 'مستخدم'}</td>
+                                     <td className="p-4 whitespace-nowrap">{report.type === 'post' ? 'منشور' : report.type === 'user' ? 'مستخدم' : 'رسالة'}</td>
                                      <td className="p-4 whitespace-normal max-w-xs truncate">{report.reason}</td>
                                      <td className="p-4 whitespace-nowrap">{report.reporterName}</td>
                                      <td className="p-4 whitespace-nowrap">
@@ -273,16 +278,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
             </div>
          );
         case 'posts':
-             const [showAddForm, setShowAddForm] = useState(false);
             return (
                 <div>
                      <div className="flex justify-between items-center mb-6">
                         <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">إدارة المنشورات</h2>
-                        <button onClick={() => setShowAddForm(!showAddForm)} className="flex items-center gap-2 bg-emerald-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-emerald-600 transition-transform transform hover:scale-105 shadow-lg">
-                            {showAddForm ? 'إغلاق' : 'منشور جديد'}
+                        <button onClick={() => setShowAddPostForm(!showAddPostForm)} className="flex items-center gap-2 bg-emerald-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-emerald-600 transition-transform transform hover:scale-105 shadow-lg">
+                            {showAddPostForm ? 'إغلاق' : 'منشور جديد'}
                         </button>
                     </div>
-                     {showAddForm && (
+                     {showAddPostForm && (
                          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8">
                             <form onSubmit={(e) => {
                                 e.preventDefault();
@@ -291,7 +295,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
                                 const description = formData.get('description') as string;
                                 if(title && description) {
                                     props.onAddPost({ authorId: props.currentUser.id, authorName: props.currentUser.fullName, authorRole: UserRole.Admin, title, description });
-                                    setShowAddForm(false);
+                                    setShowAddPostForm(false);
                                 }
                             }} className="space-y-4">
                                 <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-4">أضف منشور جديد</h2>
@@ -305,14 +309,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
                     )}
                     <div className="space-y-6">
                         {props.posts.map(post => (
-                            <PostCard 
-                                key={post.id} 
-                                post={post} 
-                                currentUser={props.currentUser} 
-                                onCommentSubmit={props.onCommentSubmit} 
-                                onSelectLawyer={()=>{}}
-                                onReport={props.onReport} 
-                            />
+                            <div key={post.id} className="relative group">
+                                <PostCard 
+                                    post={post} 
+                                    currentUser={props.currentUser} 
+                                    onCommentSubmit={props.onCommentSubmit} 
+                                    onSelectLawyer={()=>{}}
+                                    onReport={props.onReport} 
+                                />
+                                <div className="absolute top-6 left-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => props.onTriggerEditPost(post)} className="bg-white dark:bg-slate-600 p-2 rounded-full shadow-md hover:bg-slate-100 dark:hover:bg-slate-500"><PencilIcon className="w-5 h-5 text-slate-600 dark:text-slate-200" /></button>
+                                    <button onClick={() => window.confirm('هل أنت متأكد؟') && props.onDeletePost(post.id)} className="bg-white dark:bg-slate-600 p-2 rounded-full shadow-md hover:bg-slate-100 dark:hover:bg-slate-500"><TrashIcon className="w-5 h-5 text-red-600" /></button>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </div>

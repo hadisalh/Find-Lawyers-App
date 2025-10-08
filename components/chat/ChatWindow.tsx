@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Chat, ChatMessage, User } from '../../types';
-import { PaperAirplaneIcon } from '../ui/icons';
+import { PaperAirplaneIcon, FlagIcon } from '../ui/icons';
 
 interface ChatWindowProps {
   chat: Chat;
@@ -9,9 +9,10 @@ interface ChatWindowProps {
   onSendMessage: (chatId: string, message: ChatMessage) => void;
   onClose: () => void;
   isReadOnly?: boolean;
+  onReportMessage: (chatId: string, messageId: number, messageText: string) => void;
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, currentUser, otherUserName, onSendMessage, onClose, isReadOnly = false }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, currentUser, otherUserName, onSendMessage, onClose, isReadOnly = false, onReportMessage }) => {
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -53,13 +54,25 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, currentUser, other
       
       <div className="flex-1 p-4 overflow-y-auto bg-slate-100 dark:bg-slate-900 custom-scrollbar">
         {chat.messages.map(msg => (
-          <div key={msg.id} className={`flex mb-3 ${isMyMessage(msg) ? 'justify-end' : 'justify-start'}`}>
+          <div key={msg.id} className={`flex items-end mb-3 group ${isMyMessage(msg) ? 'justify-end' : 'justify-start'}`}>
+            {!isMyMessage(msg) && !isReadOnly && (
+              <button 
+                onClick={() => onReportMessage(chat.id, msg.id, msg.text)}
+                className="text-slate-400 hover:text-red-500 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                title="الإبلاغ عن هذه الرسالة"
+              >
+                <FlagIcon className="w-4 h-4" />
+              </button>
+            )}
             <div className={`rounded-2xl py-2 px-4 max-w-[80%] ${isMyMessage(msg) ? 'bg-emerald-500 text-white rounded-br-none' : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-none shadow-sm'}`}>
               <p className="text-md">{msg.text}</p>
               <p className={`text-xs mt-1 text-right ${isMyMessage(msg) ? 'text-emerald-100' : 'text-slate-400'}`}>
                 {new Date(msg.timestamp).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
+             {isMyMessage(msg) && !isReadOnly && (
+              <div className="w-6 ml-2" />
+            )}
           </div>
         ))}
          <div ref={messagesEndRef} />

@@ -29,7 +29,7 @@ const App: React.FC = () => {
   const [viewingLawyerProfile, setViewingLawyerProfile] = useState<Lawyer | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
-  const [reportingTarget, setReportingTarget] = useState<{type: 'user' | 'post', id: number, name: string} | null>(null);
+  const [reportingTarget, setReportingTarget] = useState<{type: 'user' | 'post' | 'message', id: number, name: string, context?: { chatId?: string; }} | null>(null);
 
 
   useEffect(() => {
@@ -160,8 +160,8 @@ const App: React.FC = () => {
     setViewingLawyerProfile(null);
   };
 
-  const handleOpenReportModal = (type: 'user' | 'post', id: number, name: string) => {
-    setReportingTarget({ type, id, name });
+  const handleOpenReportModal = (type: 'user' | 'post' | 'message', id: number, name: string, context?: { chatId?: string }) => {
+    setReportingTarget({ type, id, name, context });
   };
 
   const handleAddReport = (reason: string) => {
@@ -177,6 +177,7 @@ const App: React.FC = () => {
       reason,
       status: ReportStatus.Pending,
       createdAt: new Date().toISOString(),
+      context: reportingTarget.context,
     };
 
     setReports(prev => [...prev, newReport]);
@@ -250,6 +251,9 @@ const App: React.FC = () => {
                   otherUserName={otherUser?.fullName || 'مستخدم'}
                   onSendMessage={handleSendMessage}
                   onClose={() => setActiveChatId(null)}
+                  onReportMessage={(chatId, messageId, messageText) => 
+                    handleOpenReportModal('message', messageId, messageText, { chatId })
+                  }
                 />
               )
           })()}
@@ -266,6 +270,7 @@ const App: React.FC = () => {
                     onSendMessage={() => {}} // No sending for admin
                     onClose={() => setAdminViewingChatId(null)}
                     isReadOnly={true}
+                    onReportMessage={() => {}} // No reporting for admin
                   />
               )
            })()}

@@ -5,7 +5,7 @@ interface ReportModalProps {
   onClose: () => void;
   onSubmit: (reason: string) => void;
   targetName: string;
-  targetType: 'user' | 'post';
+  targetType: 'user' | 'post' | 'message';
 }
 
 export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSubmit, targetName, targetType }) => {
@@ -22,7 +22,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
     setReason('');
   };
   
-  const targetTypeText = targetType === 'user' ? 'المستخدم' : 'المنشور';
+  const targetTypeText = targetType === 'user' ? 'المستخدم' : targetType === 'post' ? 'المنشور' : 'الرسالة';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4" onClick={onClose}>
@@ -33,7 +33,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSub
         </header>
         <main className="p-6 space-y-4">
           <p className="text-slate-600 dark:text-slate-300">
-            أنت على وشك الإبلاغ عن {targetTypeText}: <strong className="text-slate-800 dark:text-slate-100">{targetName}</strong>.
+            أنت على وشك الإبلاغ عن {targetTypeText}: <strong className="text-slate-800 dark:text-slate-100 break-all">"{targetName}"</strong>.
           </p>
           <div>
             <label className="block text-gray-700 dark:text-slate-300 font-semibold mb-2">سبب الإبلاغ</label>

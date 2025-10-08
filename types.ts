@@ -96,10 +96,13 @@ export interface Report {
   id: number;
   reporterId: number;
   reporterName: string;
-  type: 'user' | 'post';
+  type: 'user' | 'post' | 'message';
   targetId: number;
   targetContentPreview: string; // e.g., user name or post title
   reason: string;
   status: ReportStatus;
   createdAt: string; // ISO date string
+  context?: {
+    chatId?: string;
+  };
 }
