@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, UserRole, Lawyer, Client, LawyerSpecialty, LawyerStatus, AccountStatus } from '../types';
 import { ScaleIcon, AtSymbolIcon, PhoneIcon, LockClosedIcon, UserIcon } from './ui/icons';
+import { ThemeToggle } from './common/ThemeToggle';
 
 interface AuthProps {
   users: User[];
@@ -110,12 +111,12 @@ export const Auth: React.FC<AuthProps> = ({ users, onLogin, onRegister }) => {
     setRegFullName(''); setRegEmail(''); setRegPhone(''); setRegPassword(''); setRegSpecialty(LawyerSpecialty.Civil); setRegIdUrl('');
   };
 
-  const commonInputClasses = "w-full p-3 pr-12 bg-slate-100 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition";
+  const commonInputClasses = "w-full p-3 pr-12 bg-slate-100 dark:bg-slate-700 dark:text-slate-200 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-slate-600 transition";
   const primaryButtonClasses = "w-full bg-emerald-500 text-white font-bold py-3 rounded-lg hover:bg-emerald-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-300";
 
   const renderLoginForm = () => (
     <form onSubmit={handleLogin} className="space-y-6">
-      <h2 className="text-3xl font-extrabold text-center text-slate-800">تسجيل الدخول</h2>
+      <h2 className="text-3xl font-extrabold text-center text-slate-800 dark:text-slate-100">تسجيل الدخول</h2>
       {loginError && <p className="bg-red-100 text-red-700 p-3 rounded-lg text-center font-semibold">{loginError}</p>}
       <InputField icon={<AtSymbolIcon className="w-5 h-5" />}>
         <input type="text" value={loginIdentifier} onChange={e => setLoginIdentifier(e.target.value)} placeholder="البريد الإلكتروني أو رقم الهاتف" className={commonInputClasses} required />
@@ -124,7 +125,7 @@ export const Auth: React.FC<AuthProps> = ({ users, onLogin, onRegister }) => {
         <input type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} placeholder="كلمة المرور" className={commonInputClasses} required />
       </InputField>
       <button type="submit" className={primaryButtonClasses}>دخول</button>
-      <p className="text-center mt-4 text-slate-600">
+      <p className="text-center mt-4 text-slate-600 dark:text-slate-400">
         ليس لديك حساب؟ <button type="button" onClick={() => setIsLoginView(false)} className="font-semibold text-emerald-600 hover:underline">سجل الآن</button>
       </p>
     </form>
@@ -132,11 +133,11 @@ export const Auth: React.FC<AuthProps> = ({ users, onLogin, onRegister }) => {
 
   const renderRegisterForm = () => (
     <form onSubmit={handleRegister} className="space-y-4">
-        <h2 className="text-3xl font-extrabold text-center text-slate-800">إنشاء حساب جديد</h2>
+        <h2 className="text-3xl font-extrabold text-center text-slate-800 dark:text-slate-100">إنشاء حساب جديد</h2>
         {registerError && <p className="bg-red-100 text-red-700 p-3 rounded-lg mb-4 text-center font-semibold">{registerError}</p>}
-        <div className="flex justify-center bg-slate-100 p-1 rounded-lg">
-            <button type="button" onClick={() => setRegisterAs('client')} className={`w-1/2 py-2 px-4 font-bold rounded-md transition-all duration-300 ${registerAs === 'client' ? 'bg-white shadow-md text-emerald-600' : 'text-slate-500'}`}>عميل</button>
-            <button type="button" onClick={() => setRegisterAs('lawyer')} className={`w-1/2 py-2 px-4 font-bold rounded-md transition-all duration-300 ${registerAs === 'lawyer' ? 'bg-white shadow-md text-emerald-600' : 'text-slate-500'}`}>محامي</button>
+        <div className="flex justify-center bg-slate-100 dark:bg-slate-700 p-1 rounded-lg">
+            <button type="button" onClick={() => setRegisterAs('client')} className={`w-1/2 py-2 px-4 font-bold rounded-md transition-all duration-300 ${registerAs === 'client' ? 'bg-white dark:bg-slate-600 shadow-md text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>عميل</button>
+            <button type="button" onClick={() => setRegisterAs('lawyer')} className={`w-1/2 py-2 px-4 font-bold rounded-md transition-all duration-300 ${registerAs === 'lawyer' ? 'bg-white dark:bg-slate-600 shadow-md text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>محامي</button>
         </div>
         
         <InputField icon={<UserIcon className="w-5 h-5"/>}><input value={regFullName} onChange={e => setRegFullName(e.target.value)} placeholder="الاسم الثلاثي" className={commonInputClasses} required /></InputField>
@@ -150,26 +151,29 @@ export const Auth: React.FC<AuthProps> = ({ users, onLogin, onRegister }) => {
                     {Object.values(LawyerSpecialty).map(spec => <option key={spec} value={spec}>{spec}</option>)}
                 </select>
                 <div>
-                    <label className="block text-sm font-semibold text-slate-600 mb-2">رفع المستمسكات الثبوتية (بطاقة/هوية)</label>
-                    <input type="file" onChange={(e) => { if (e.target.files?.length) { setRegIdUrl(URL.createObjectURL(e.target.files[0])); } }} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" required />
+                    <label className="block text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">رفع المستمسكات الثبوتية (بطاقة/هوية)</label>
+                    <input type="file" onChange={(e) => { if (e.target.files?.length) { setRegIdUrl(URL.createObjectURL(e.target.files[0])); } }} className="w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-slate-600 dark:file:text-emerald-400 dark:hover:file:bg-slate-500" required />
                 </div>
             </>
         )}
         
         <button type="submit" className={primaryButtonClasses}>تسجيل</button>
-         <p className="text-center mt-4 text-slate-600">
+         <p className="text-center mt-4 text-slate-600 dark:text-slate-400">
             لديك حساب بالفعل؟ <button type="button" onClick={() => setIsLoginView(true)} className="font-semibold text-emerald-600 hover:underline">سجل الدخول</button>
         </p>
     </form>
   );
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-100 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-900 p-4">
+        <div className="absolute top-4 left-4">
+            <ThemeToggle />
+        </div>
         <div className="flex items-center gap-3 mb-8">
             <ScaleIcon className="w-12 h-12 text-emerald-500" />
-            <h1 className="text-4xl font-extrabold text-slate-800">محامي العراق</h1>
+            <h1 className="text-4xl font-extrabold text-slate-800 dark:text-slate-100">محامي العراق</h1>
         </div>
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+      <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md">
         {isLoginView ? renderLoginForm() : renderRegisterForm()}
       </div>
     </div>

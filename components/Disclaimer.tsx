@@ -8,9 +8,9 @@ interface DisclaimerProps {
 export const Disclaimer: React.FC<DisclaimerProps> = ({ onAgree }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg shadow-2xl p-8 max-w-lg w-full mx-4 text-center">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">إخلاء مسؤولية</h2>
-        <p className="text-gray-600 mb-6">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl p-8 max-w-lg w-full mx-4 text-center">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-slate-200 mb-4">إخلاء مسؤولية</h2>
+        <p className="text-gray-600 dark:text-slate-400 mb-6">
           نحن غير مسؤولين عن أي تعامل مالي أو قانوني بين العميل والمحامي. دورنا يقتصر على تسهيل التواصل بين الطرفين.
         </p>
         <button

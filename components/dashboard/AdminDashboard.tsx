@@ -7,6 +7,7 @@ import {
   ChartPieIcon, DocumentTextIcon, UsersIcon, ChatIcon, Cog6ToothIcon, ArrowLeftOnRectangleIcon, ScaleIcon,
   TrashIcon, PencilIcon, PlusIcon, BriefcaseIcon
 } from '../ui/icons';
+import { ThemeToggle } from '../common/ThemeToggle';
 
 interface AdminDashboardProps {
   currentUser: Admin;
@@ -27,13 +28,13 @@ interface AdminDashboardProps {
 type AdminView = 'dashboard' | 'lawyers' | 'clients' | 'admins' | 'posts' | 'chats';
 
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; color: string }> = ({ icon, label, value, color }) => (
-    <div className="bg-white p-5 rounded-xl shadow-md border border-slate-200 flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-lg">
+    <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-md border border-slate-200 dark:border-slate-700 flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-lg">
       <div className={`text-white p-4 rounded-full ${color}`}>
         {icon}
       </div>
       <div>
-        <p className="text-sm font-semibold text-slate-500">{label}</p>
-        <p className="text-2xl font-extrabold text-slate-800">{value}</p>
+        <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{label}</p>
+        <p className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">{value}</p>
       </div>
     </div>
 );
@@ -119,7 +120,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       <div className="mt-auto">
         <div className="border-t border-slate-700 py-4 px-2">
             <p className="text-sm text-slate-300">أهلاً بك،</p>
-            <p className="font-bold text-white">{currentUser.fullName}</p>
+            <p className="font-bold text-white mb-4">{currentUser.fullName}</p>
+            <ThemeToggle />
         </div>
         <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 font-bold rounded-lg bg-slate-800 text-slate-300 hover:bg-red-500/20 hover:text-red-400 transition-colors">
             <ArrowLeftOnRectangleIcon className="w-5 h-5" />
@@ -131,11 +133,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const renderContent = () => {
     // Shared table styles
-    const tableBaseClass = "w-full text-sm text-left text-gray-500";
-    const theadClass = "text-xs text-gray-700 uppercase bg-gray-100";
+    const tableBaseClass = "w-full text-sm text-left text-slate-500 dark:text-slate-400";
+    const theadClass = "text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-100 dark:bg-slate-700";
     const thClass = "px-2 py-3 md:px-6";
     const tdClass = "px-2 py-4 md:px-6";
-    const trClass = "bg-white border-b hover:bg-gray-50";
+    const trClass = "bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50";
 
     const filteredUsers = users.filter(u => u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -143,7 +145,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'dashboard':
         return (
           <>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 mb-6">نظرة عامة</h2>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-slate-100 mb-6">نظرة عامة</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <StatCard icon={<BriefcaseIcon className="w-6 h-6"/>} label="إجمالي المحامين" value={lawyers.length} color="bg-blue-500" />
               <StatCard icon={<UsersIcon className="w-6 h-6"/>} label="إجمالي العملاء" value={clients.length} color="bg-green-500" />
@@ -157,15 +159,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         const filteredLawyers = filteredUsers.filter(u => u.role === UserRole.Lawyer) as Lawyer[];
         return (
           <>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 mb-6">إدارة المحامين</h2>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-slate-100 mb-6">إدارة المحامين</h2>
             {/* Search bar could be added here */}
-            <div className="bg-white rounded-xl shadow-lg border overflow-x-auto">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border dark:border-slate-700 overflow-x-auto">
               <table className={tableBaseClass}>
                 <thead className={theadClass}><tr><th className={thClass}>الاسم</th><th className={thClass}>الحالة</th><th className={thClass}>حالة الحساب</th><th className={thClass}>إجراءات</th></tr></thead>
                 <tbody>
                   {filteredLawyers.map(lawyer => (
                     <tr key={lawyer.id} className={trClass}>
-                      <td className={tdClass}><button onClick={() => onViewLawyerProfile(lawyer)} className="font-bold text-blue-600 hover:underline">{lawyer.fullName}</button></td>
+                      <td className={`${tdClass} text-slate-900 dark:text-white`}><button onClick={() => onViewLawyerProfile(lawyer)} className="font-bold text-blue-600 hover:underline">{lawyer.fullName}</button></td>
                       <td className={tdClass}>{lawyer.status}</td>
                       <td className={tdClass}>{lawyer.accountStatus}</td>
                       <td className={`${tdClass} flex items-center gap-2 sm:gap-4`}>
@@ -189,14 +191,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         const filteredClients = filteredUsers.filter(u => u.role === UserRole.Client) as Client[];
         return (
             <>
-                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 mb-6">إدارة العملاء</h2>
-                <div className="bg-white rounded-xl shadow-lg border overflow-x-auto">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-slate-100 mb-6">إدارة العملاء</h2>
+                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border dark:border-slate-700 overflow-x-auto">
                     <table className={tableBaseClass}>
                         <thead className={theadClass}><tr><th className={thClass}>الاسم</th><th className={thClass}>البريد الإلكتروني</th><th className={thClass}>حالة الحساب</th><th className={thClass}>إجراءات</th></tr></thead>
                         <tbody>
                             {filteredClients.map(client => (
                                 <tr key={client.id} className={trClass}>
-                                    <td className={tdClass}>{client.fullName}</td>
+                                    <td className={`${tdClass} text-slate-900 dark:text-white`}>{client.fullName}</td>
                                     <td className={tdClass}>{client.email}</td>
                                     <td className={tdClass}>{client.accountStatus}</td>
                                     <td className={`${tdClass} flex items-center gap-2 sm:gap-4`}>
@@ -218,7 +220,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return (
             <>
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">إدارة المشرفين</h2>
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-slate-100">إدارة المشرفين</h2>
                     {isSuperAdmin && (
                       <button onClick={() => setShowAddAdmin(!showAddAdmin)} className="flex items-center gap-2 bg-emerald-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-emerald-600 transition-transform transform hover:scale-105 shadow-lg">
                           <PlusIcon className="w-5 h-5" />
@@ -227,20 +229,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     )}
                 </div>
                 {showAddAdmin && isSuperAdmin && (
-                    <div className="bg-white p-6 rounded-xl shadow-lg border mb-8">
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border dark:border-slate-700 mb-8">
                         <form onSubmit={handleAddAdmin} className="space-y-4">
-                            <h3 className="text-xl font-bold text-slate-800">إضافة مشرف جديد</h3>
+                            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">إضافة مشرف جديد</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <input name="fullName" placeholder="الاسم الكامل" className="w-full p-3 border border-slate-300 rounded-lg" required />
-                                <input name="email" type="email" placeholder="البريد الإلكتروني" className="w-full p-3 border border-slate-300 rounded-lg" required />
-                                <input name="phone" placeholder="رقم الهاتف" className="w-full p-3 border border-slate-300 rounded-lg" required />
-                                <input name="password" type="password" placeholder="كلمة المرور" className="w-full p-3 border border-slate-300 rounded-lg" required />
+                                <input name="fullName" placeholder="الاسم الكامل" className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-slate-200" required />
+                                <input name="email" type="email" placeholder="البريد الإلكتروني" className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-slate-200" required />
+                                <input name="phone" placeholder="رقم الهاتف" className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-slate-200" required />
+                                <input name="password" type="password" placeholder="كلمة المرور" className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-slate-200" required />
                             </div>
                             <div className="flex justify-end"><button type="submit" className="bg-emerald-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-emerald-600">إضافة</button></div>
                         </form>
                     </div>
                 )}
-                <div className="bg-white rounded-xl shadow-lg border overflow-x-auto">
+                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border dark:border-slate-700 overflow-x-auto">
                     <table className={tableBaseClass}>
                         <thead className={theadClass}>
                           <tr>
@@ -252,12 +254,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <tbody>
                             {admins.map(admin => (
                                 <tr key={admin.id} className={trClass}>
-                                    <td className={tdClass}>{admin.fullName}</td>
+                                    <td className={`${tdClass} text-slate-900 dark:text-white`}>{admin.fullName}</td>
                                     <td className={tdClass}>{admin.email}</td>
                                     {isSuperAdmin && (
                                       <td className={`${tdClass} flex gap-2 sm:gap-4`}>
-                                          <button onClick={() => setEditingAdmin(admin)}><PencilIcon className="w-5 h-5 text-slate-600 hover:text-blue-600" /></button>
-                                          {admin.id !== currentUser.id && <button onClick={() => window.confirm('Are you sure?') && onDeleteUser(admin.id)}><TrashIcon className="w-5 h-5 text-slate-600 hover:text-red-600" /></button>}
+                                          <button onClick={() => setEditingAdmin(admin)}><PencilIcon className="w-5 h-5 text-slate-600 dark:text-slate-400 hover:text-blue-600" /></button>
+                                          {admin.id !== currentUser.id && <button onClick={() => window.confirm('Are you sure?') && onDeleteUser(admin.id)}><TrashIcon className="w-5 h-5 text-slate-600 dark:text-slate-400 hover:text-red-600" /></button>}
                                       </td>
                                     )}
                                 </tr>
@@ -271,14 +273,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'posts':
         return (
             <>
-                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 mb-6">إدارة المنشورات</h2>
-                <div className="bg-white rounded-xl shadow-lg border overflow-x-auto">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-slate-100 mb-6">إدارة المنشورات</h2>
+                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border dark:border-slate-700 overflow-x-auto">
                      <table className={tableBaseClass}>
                         <thead className={theadClass}><tr><th className={thClass}>العنوان</th><th className={thClass}>صاحب المنشور</th><th className={thClass}>تاريخ النشر</th><th className={thClass}>إجراءات</th></tr></thead>
                         <tbody>
                             {posts.map(post => (
                                 <tr key={post.id} className={trClass}>
-                                    <td className={`${tdClass} whitespace-normal break-words`}>{post.title}</td>
+                                    <td className={`${tdClass} whitespace-normal break-words text-slate-900 dark:text-white`}>{post.title}</td>
                                     <td className={tdClass}>{post.clientName}</td>
                                     <td className={tdClass}>{new Date(post.createdAt).toLocaleDateString()}</td>
                                     <td className={tdClass}>
@@ -294,20 +296,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'chats':
          return (
             <>
-                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 mb-6">مراقبة المحادثات</h2>
-                <div className="bg-white rounded-xl shadow-lg border">
-                    <ul className="divide-y divide-slate-200">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-slate-100 mb-6">مراقبة المحادثات</h2>
+                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border dark:border-slate-700">
+                    <ul className="divide-y divide-slate-200 dark:divide-slate-700">
                         {chats.map(chat => {
                             const client = users.find(u => u.id === chat.clientId);
                             const lawyer = users.find(u => u.id === chat.lawyerId);
                             if (!client || !lawyer) return null;
                             return (
-                                <li key={chat.id} className="p-3 hover:bg-slate-50 flex items-center justify-between">
+                                <li key={chat.id} className="p-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center justify-between">
                                     <div>
-                                        <p className="font-bold text-slate-800">{client.fullName} &harr; {lawyer.fullName}</p>
-                                        <p className="text-sm text-slate-500">{chat.messages.length} رسائل</p>
+                                        <p className="font-bold text-slate-800 dark:text-slate-200">{client.fullName} &harr; {lawyer.fullName}</p>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">{chat.messages.length} رسائل</p>
                                     </div>
-                                    <button onClick={() => onViewChat(chat.id)} className="bg-slate-200 text-slate-800 font-bold py-2 px-3 rounded-lg hover:bg-slate-300">عرض</button>
+                                    <button onClick={() => onViewChat(chat.id)} className="bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold py-2 px-3 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-500">عرض</button>
                                 </li>
                             )
                         })}

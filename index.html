@@ -6,25 +6,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>محامي العراق</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Tajawal', 'sans-serif'],
+            },
+          }
+        }
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script>
+      // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    </script>
     <style>
       :root {
         --bg-primary: #f1f5f9; /* slate-100 */
-        --bg-secondary: #ffffff; /* white */
-        --sidebar-bg: #0f172a; /* slate-900 */
         --text-primary: #1e293b; /* slate-800 */
-        --text-secondary: #64748b; /* slate-500 */
-        --text-on-dark: #cbd5e1; /* slate-300 */
-        --accent: #10b981; /* emerald-500 */
-        --accent-hover: #059669; /* emerald-600 */
         --border-color: #e2e8f0; /* slate-200 */
+      }
+      .dark {
+        --bg-primary: #0f172a; /* slate-900 */
+        --text-primary: #f1f5f9; /* slate-100 */
+        --border-color: #334155; /* slate-700 */
       }
       body {
         font-family: 'Tajawal', sans-serif;
         background-color: var(--bg-primary);
         color: var(--text-primary);
+        transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
       }
       .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
@@ -37,6 +57,16 @@
         border-radius: 3px;
       }
       .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #64748b; /* slate-500 */
+      }
+
+      .dark .custom-scrollbar::-webkit-scrollbar-track {
+        background: #1e293b; /* slate-800 */
+      }
+      .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #475569; /* slate-600 */
+      }
+      .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
         background: #64748b; /* slate-500 */
       }
     </style>
