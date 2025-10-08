@@ -3,7 +3,7 @@ import React from 'react';
 // Common props for icons
 type IconProps = React.SVGProps<SVGSVGElement>;
 
-const logoBase64 = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgdmlld0JveD0iMCAwIDI1NiAyNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImJnLWdyYWQiIHgxPSIxMjgiIHkxPSIwIiB4Mj0iMTI4IiB5Mj0iMjU2IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMxRTI5M0IiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMEYxNzJBIi8+CjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0iaWNvbi1ncmFkIiB4MT0iMTI4IiB5MT0iNTgiIHgyPSIxMjgiIHkyPSIxOTgiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iI0ZCQkYyNCIvPgogIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0Q5NzcwNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+CjxyZWN0IHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiByeD0iNTYiIGZpbGw9InVybCgjYmctZ3JhZCkiLz4KPGcgZmlsbD0idXJsKCNpY29uLWdyYWQpIj4KPHJlY3QgeD0iMTIwIiB5PSI1OCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE0MCIgcng9IjgiLz4KPHJlY3QgeD0iNTYiIHk9Ijg4IiB3aWR0aD0iMTQ0IiBoZWlnaHQ9IjE2IiByeD0iOCIvPgo8cGF0aCBkPSJNOTggMTA0Qzk4IDEwNCA5OCAxMzguNjY3IDcxLjUgMTU3LjVDNDUgMTc2LjMzMyA0OCAxMDQgNDggMTA0TDk4IDEwNFoiLz4KPHBhdGggZD0iMjA4IDEwNEMyMDggMTA0IDIwOCAxMzguNjY3IDE4MS41IDE1Ny41QzE1NSAxNzYuMzMzIDE1OCAxMDQgMTU4IDEwNEwyMDggMTA0WiIvPgo8L2c+Cjwvc3ZnPgo=";
+const logoBase64 = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgdmlld0JveD0iMCAwIDI1NiAyNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJiZy1ncmFkIiB4MT0iMTI4IiB5MT0iMCIgeDI9IjEyOCIgeTI9IjI1NiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIHN0b3AtY29sb3I9IiMxRTI5M0IiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwRjE3MkEiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iaWNvbi1ncmFkIiB4MT0iMTI4IiB5MT0iNTAiIHgyPSIxMjgiIHkyPSIyMTAiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj48c3RvcCBzdG9wLWNvbG9yPSIjRkJCRjI0Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjRDk3NzA2Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjI1NiIgaGVpZ2h0PSIyNTYiIHJ4PSI1NiIgZmlsbD0idXJsKCNiZy1ncmFkKSIvPjxnIGZpbGw9InVybCgjaWNvbi1ncmFkKSI+PHJlY3QgeD0iNzIiIHk9IjIwMCIgd2lkdGg9IjExMiIgaGVpZ2h0PSIxMiIgcng9IjYiLz48cmVjdCB4PSIxMjAiIHk9IjYwIiB3aWR0aD0iMTYiIGhlaWdodD0iMTQwIiByeD0iOCIvPjxyZWN0IHg9IjQwIiB5PSI2MCIgd2lkdGg9IjE3NiIgaGVpZ2h0PSIxNiIgcng9IjgiLz48cmVjdCB4PSI2NiIgeT0iNzYiIHdpZHRoPSI4IiBoZWlnaHQ9IjUwIiByeD0iNCIvPjxwYXRoIGQ9Ik00MCAxNDIgQyA0MCAxMzIsIDk4IDEzMiwgOTggMTQyIEwgODYgMTU2IEggNTIgWiIvPjxyZWN0IHg9IjE4MiIgeT0iNzYiIHdpZHRoPSI4IiBoZWlnaHQ9IjUwIiByeD0iNCIvPjxwYXRoIGQ9Ik0xNTggMTQyIEMgMTU4IDEzMiwgMjE2IDEzMiwgMjE2IDE0MiBMIDIwNCAxNTYgSCAxNzAgWiIvPjwvZz48L3N2Zz4=";
 
 export const ScaleIcon: React.FC<IconProps> = (props) => (
   <img src={logoBase64} alt="App Logo" className={props.className} />
@@ -159,4 +159,16 @@ export const MoonIcon: React.FC<IconProps> = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
     </svg>
+);
+
+export const FlagIcon: React.FC<IconProps> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5" />
+  </svg>
+);
+
+export const NoSymbolIcon: React.FC<IconProps> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+  </svg>
 );

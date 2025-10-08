@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Lawyer, User, UserRole } from '../../types';
-import { StarIcon, UserIcon, AtSymbolIcon, PhoneIcon } from '../ui/icons';
+import { StarIcon, UserIcon, AtSymbolIcon, PhoneIcon, FlagIcon } from '../ui/icons';
 
 interface LawyerProfileModalProps {
   lawyer: Lawyer;
   onClose: () => void;
   currentUser: User;
   onRateLawyer: (lawyerId: number, rating: number, review: string) => void;
+  onReportUser: (userId: number, userName: string) => void;
 }
 
-export const LawyerProfileModal: React.FC<LawyerProfileModalProps> = ({ lawyer, onClose, currentUser, onRateLawyer }) => {
+export const LawyerProfileModal: React.FC<LawyerProfileModalProps> = ({ lawyer, onClose, currentUser, onRateLawyer, onReportUser }) => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [review, setReview] = useState('');
@@ -38,7 +39,7 @@ export const LawyerProfileModal: React.FC<LawyerProfileModalProps> = ({ lawyer, 
                 <div className="bg-slate-100 dark:bg-slate-700 p-6 rounded-full">
                     <UserIcon className="w-16 h-16 text-slate-500 dark:text-slate-400" />
                 </div>
-                <div className="text-center sm:text-right">
+                <div className="text-center sm:text-right flex-grow">
                     <h3 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{lawyer.fullName}</h3>
                     <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-500">{lawyer.specialty}</p>
                     <div className="flex justify-center sm:justify-start items-center gap-2 mt-2">
@@ -50,6 +51,15 @@ export const LawyerProfileModal: React.FC<LawyerProfileModalProps> = ({ lawyer, 
                         <span className="text-slate-600 dark:text-slate-300">{lawyer.numberOfRatings} تقييم</span>
                     </div>
                 </div>
+                 {canRate && (
+                    <button 
+                        onClick={() => onReportUser(lawyer.id, lawyer.fullName)}
+                        className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-500 font-semibold"
+                    >
+                        <FlagIcon className="w-4 h-4" />
+                        <span>إبلاغ</span>
+                    </button>
+                )}
                 <div className="sm:ml-auto text-center sm:text-right bg-blue-50 dark:bg-blue-900/50 p-3 rounded-lg">
                     <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">القضايا الرابحة</p>
                     <p className="text-3xl font-bold text-blue-900 dark:text-blue-200">{lawyer.wonCases}</p>

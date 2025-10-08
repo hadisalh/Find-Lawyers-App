@@ -38,8 +38,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chat, currentUser, other
 
   const isMyMessage = (msg: ChatMessage) => {
       if (isReadOnly) {
-          // In admin view, client is "receiver", lawyer is "sender"
-          return msg.senderId === chat.lawyerId;
+          // In admin view, align messages based on participant index for consistency
+          return msg.senderId === chat.participantIds[1];
       }
       return msg.senderId === currentUser.id;
   }

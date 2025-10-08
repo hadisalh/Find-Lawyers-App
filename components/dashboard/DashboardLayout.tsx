@@ -12,7 +12,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ sidebar, child
   return (
     <div className="flex min-h-screen bg-slate-100 dark:bg-slate-900">
       {/* Sidebar for Desktop */}
-      <aside className="w-64 bg-slate-900 text-white p-4 flex-col fixed h-full hidden md:flex">
+      <aside className="w-64 bg-slate-900 text-white p-4 flex-col fixed h-full hidden md:flex right-0 top-0">
         {sidebar}
       </aside>
       
@@ -33,7 +33,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ sidebar, child
         </aside>
       </div>
 
-      <div className="flex-1 flex flex-col md:mr-64">
+      <div className="flex-1 flex flex-col md:mr-64 min-w-0">
         {/* Mobile Header */}
         <header className="md:hidden bg-white dark:bg-slate-800 shadow-sm sticky top-0 z-30 p-4 flex justify-between items-center">
             <button onClick={() => setIsSidebarOpen(true)} className="text-slate-600 dark:text-slate-300 hover:text-emerald-500">

@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Post, User, Chat, Client, Lawyer, LawyerSpecialty, LawyerStatus, Comment } from '../../types';
+import { Post, User, Chat, Client, Lawyer, LawyerSpecialty, LawyerStatus, Comment, UserRole } from '../../types';
 import { PostCard } from '../common/PostCard';
-import { EditPostModal } from './EditPostModal';
 import { DashboardLayout } from './DashboardLayout';
 import { PlusIcon, UserIcon, ChatIcon, PencilIcon, TrashIcon, HomeIcon, DocumentTextIcon, UsersIcon, StarIcon, MagnifyingGlassIcon, ScaleIcon, ArrowLeftOnRectangleIcon } from '../ui/icons';
 import { ThemeToggle } from '../common/ThemeToggle';
@@ -22,23 +21,24 @@ export const ClientDashboard: React.FC<{
   users: User[];
   onAddPost: (post: Omit<Post, 'id' | 'createdAt' | 'comments'>) => void;
   onUpdatePost: (post: Post) => void;
+  onEditPost: (post: Post) => void;
   onDeletePost: (postId: number) => void;
   onCommentSubmit: (postId: number, comment: any) => void;
   onSelectLawyer: (lawyerId: number) => void;
   onChatIconClick: (chatId: string) => void;
   onViewLawyerProfile: (lawyer: Lawyer) => void;
+  onReport: (type: 'post' | 'user', id: number, name: string) => void;
   onLogout: () => void;
 }> = ({
-  currentUser, posts, chats, users, onAddPost, onUpdatePost, onDeletePost, onCommentSubmit, onSelectLawyer, onChatIconClick, onViewLawyerProfile, onLogout
+  currentUser, posts, chats, users, onAddPost, onUpdatePost, onEditPost, onDeletePost, onCommentSubmit, onSelectLawyer, onChatIconClick, onViewLawyerProfile, onReport, onLogout
 }) => {
   const [activeView, setActiveView] = useState<ClientView>('my-posts');
-  const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState<LawyerSpecialty | 'all'>('all');
 
-  const clientPosts = posts.filter(p => p.clientId === currentUser.id);
-  const clientChats = chats.filter(c => c.clientId === currentUser.id);
+  const clientPosts = posts.filter(p => p.authorId === currentUser.id);
+  const clientChats = chats.filter(c => c.participantIds.includes(currentUser.id));
   const approvedLawyers = useMemo(() => users.filter(u => u.role === 'lawyer' && (u as Lawyer).status === LawyerStatus.Approved) as Lawyer[], [users]);
 
   const filteredLawyers = useMemo(() => {
@@ -50,7 +50,7 @@ export const ClientDashboard: React.FC<{
   }, [approvedLawyers, searchTerm, specialtyFilter]);
 
   const handleAddPost = (title: string, description: string) => {
-    onAddPost({ clientId: currentUser.id, clientName: currentUser.fullName, title, description });
+    onAddPost({ authorId: currentUser.id, authorName: currentUser.fullName, authorRole: UserRole.Client, title, description });
     setShowAddForm(false);
     setActiveView('my-posts');
   };
@@ -117,9 +117,9 @@ export const ClientDashboard: React.FC<{
             )}
             {clientPosts.length > 0 ? clientPosts.map(post => (
                  <div key={post.id} className="relative group">
-                    <PostCard post={post} currentUser={currentUser} onCommentSubmit={onCommentSubmit} onSelectLawyer={onSelectLawyer}/>
+                    <PostCard post={post} currentUser={currentUser} onCommentSubmit={onCommentSubmit} onSelectLawyer={onSelectLawyer} onReport={onReport}/>
                     <div className="absolute top-6 left-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => setEditingPost(post)} className="bg-white dark:bg-slate-600 p-2 rounded-full shadow-md hover:bg-slate-100 dark:hover:bg-slate-500"><PencilIcon className="w-5 h-5 text-slate-600 dark:text-slate-200" /></button>
+                        <button onClick={() => onEditPost(post)} className="bg-white dark:bg-slate-600 p-2 rounded-full shadow-md hover:bg-slate-100 dark:hover:bg-slate-500"><PencilIcon className="w-5 h-5 text-slate-600 dark:text-slate-200" /></button>
                         <button onClick={() => window.confirm('هل أنت متأكد؟') && onDeletePost(post.id)} className="bg-white dark:bg-slate-600 p-2 rounded-full shadow-md hover:bg-slate-100 dark:hover:bg-slate-500"><TrashIcon className="w-5 h-5 text-red-600" /></button>
                     </div>
                 </div>
@@ -131,7 +131,7 @@ export const ClientDashboard: React.FC<{
             <>
                 <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-slate-100 mb-6">كل الاستشارات</h2>
                 {posts.length > 0 ? posts.map(post => (
-                    <PostCard key={post.id} post={post} currentUser={currentUser} onCommentSubmit={onCommentSubmit} onSelectLawyer={onSelectLawyer}/>
+                    <PostCard key={post.id} post={post} currentUser={currentUser} onCommentSubmit={onCommentSubmit} onSelectLawyer={onSelectLawyer} onReport={onReport}/>
                 )) : <p className="text-center text-slate-500 dark:text-slate-400 py-10">لا توجد استشارات منشورة حاليًا.</p>}
             </>
         );
@@ -196,13 +196,14 @@ export const ClientDashboard: React.FC<{
                     {clientChats.length > 0 ? (
                         <ul className="divide-y divide-slate-200 dark:divide-slate-700">
                             {clientChats.map(chat => {
-                                const lawyer = users.find(u => u.id === chat.lawyerId);
-                                if (!lawyer) return null;
+                                const otherUserId = chat.participantIds.find(id => id !== currentUser.id);
+                                const otherUser = users.find(u => u.id === otherUserId);
+                                if (!otherUser) return null;
                                 return (
                                     <li key={chat.id} className="p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center gap-4" onClick={() => onChatIconClick(chat.id)}>
                                         <div className="bg-slate-200 dark:bg-slate-600 p-3 rounded-full"><UserIcon className="w-6 h-6 text-slate-600 dark:text-slate-300"/></div>
                                         <div>
-                                            <p className="font-bold text-slate-800 dark:text-slate-200">{lawyer.fullName}</p>
+                                            <p className="font-bold text-slate-800 dark:text-slate-200">{otherUser.fullName}</p>
                                             <p className="text-sm text-slate-500 dark:text-slate-400">اضغط لعرض المحادثة</p>
                                         </div>
                                     </li>
@@ -221,14 +222,6 @@ export const ClientDashboard: React.FC<{
       <DashboardLayout sidebar={sidebarContent}>
         {renderContent()}
       </DashboardLayout>
-
-      {editingPost && (
-        <EditPostModal
-          post={editingPost}
-          onSave={(updatedPost) => { onUpdatePost(updatedPost); setEditingPost(null); }}
-          onClose={() => setEditingPost(null)}
-        />
-      )}
     </>
   );
 };

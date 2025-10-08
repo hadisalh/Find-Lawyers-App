@@ -12,6 +12,7 @@ interface LawyerDashboardProps {
   users: User[];
   onCommentSubmit: (postId: number, comment: Comment) => void;
   onChatIconClick: (chatId: string) => void;
+  onReport: (type: 'post' | 'user', id: number, name: string) => void;
   onLogout: () => void;
 }
 
@@ -44,10 +45,11 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({
   users,
   onCommentSubmit,
   onChatIconClick,
+  onReport,
   onLogout
 }) => {
   const [activeView, setActiveView] = useState<LawyerView>('posts');
-  const lawyerChats = chats.filter(c => c.lawyerId === currentUser.id);
+  const lawyerChats = chats.filter(c => c.participantIds.includes(currentUser.id));
 
   const sidebarContent = (
     <>
@@ -90,6 +92,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({
                   currentUser={currentUser}
                   onCommentSubmit={onCommentSubmit}
                   onSelectLawyer={() => {}} // Lawyers don't select other lawyers
+                  onReport={onReport}
                 />
               ))
             ) : (
@@ -107,8 +110,9 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({
                 {lawyerChats.length > 0 ? (
                   <ul className="divide-y divide-slate-200 dark:divide-slate-700">
                     {lawyerChats.map(chat => {
-                      const client = users.find(u => u.id === chat.clientId);
-                      if (!client) return null;
+                      const otherUserId = chat.participantIds.find(id => id !== currentUser.id);
+                      const otherUser = users.find(u => u.id === otherUserId);
+                      if (!otherUser) return null;
                       const lastMessage = chat.messages[chat.messages.length - 1];
                       return (
                         <li key={chat.id} className="p-4 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center gap-4" onClick={() => onChatIconClick(chat.id)}>
@@ -116,7 +120,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({
                             <UserIcon className="w-7 h-7 text-slate-600 dark:text-slate-300"/>
                           </div>
                           <div className="flex-grow">
-                              <p className="font-bold text-lg text-slate-800 dark:text-slate-200">{client.fullName}</p>
+                              <p className="font-bold text-lg text-slate-800 dark:text-slate-200">{otherUser.fullName}</p>
                               <p className="text-md text-slate-500 dark:text-slate-400 truncate max-w-xs sm:max-w-md">
                                 {lastMessage ? `${lastMessage.senderId === currentUser.id ? 'أنت: ' : ''}${lastMessage.text}` : 'ابدأ المحادثة...'}
                               </p>

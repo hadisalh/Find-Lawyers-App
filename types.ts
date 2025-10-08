@@ -24,6 +24,11 @@ export enum AccountStatus {
   Banned = 'banned',
 }
 
+export enum ReportStatus {
+  Pending = 'pending',
+  Resolved = 'resolved',
+}
+
 export interface User {
   id: number;
   email: string;
@@ -55,17 +60,19 @@ export interface Admin extends User {
 
 export interface Comment {
   id: number;
-  lawyerId: number;
-  lawyerName: string;
-  lawyerSpecialty: LawyerSpecialty;
+  authorId: number;
+  authorName: string;
+  authorRole: UserRole;
+  authorSpecialty?: LawyerSpecialty;
   text: string;
-  cost: string;
+  cost?: string;
 }
 
 export interface Post {
   id: number;
-  clientId: number;
-  clientName: string;
+  authorId: number;
+  authorName: string;
+  authorRole: UserRole;
   title: string;
   description: string;
   comments: Comment[];
@@ -81,7 +88,18 @@ export interface ChatMessage {
 
 export interface Chat {
   id: string;
-  clientId: number;
-  lawyerId: number;
+  participantIds: [number, number];
   messages: ChatMessage[];
+}
+
+export interface Report {
+  id: number;
+  reporterId: number;
+  reporterName: string;
+  type: 'user' | 'post';
+  targetId: number;
+  targetContentPreview: string; // e.g., user name or post title
+  reason: string;
+  status: ReportStatus;
+  createdAt: string; // ISO date string
 }

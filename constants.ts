@@ -1,4 +1,4 @@
-import { User, Post, Chat, UserRole, LawyerStatus, LawyerSpecialty, Lawyer, Client, Admin, AccountStatus } from './types';
+import { User, Post, Chat, UserRole, LawyerStatus, LawyerSpecialty, Lawyer, Client, Admin, AccountStatus, Report } from './types';
 
 export const USERS: User[] = [
   // Admin
@@ -19,19 +19,21 @@ export const USERS: User[] = [
 export const POSTS: Post[] = [
     {
         id: 1,
-        clientId: 5,
-        clientName: 'العميل خالد',
+        authorId: 5,
+        authorName: 'العميل خالد',
+        authorRole: UserRole.Client,
         title: 'استشارة بخصوص عقد إيجار',
         description: 'أحتاج مساعدة في مراجعة عقد إيجار لشقة سكنية والتأكد من قانونية جميع البنود قبل التوقيع. العقد مكون من 5 صفحات.',
         comments: [
-            { id: 1, lawyerId: 3, lawyerName: 'المحامية فاطمة', lawyerSpecialty: LawyerSpecialty.Family, text: 'يمكنني مراجعة العقد وتقديم استشارة كاملة خلال 24 ساعة.', cost: '75,000 دينار عراقي' }
+            { id: 1, authorId: 3, authorName: 'المحامية فاطمة', authorRole: UserRole.Lawyer, authorSpecialty: LawyerSpecialty.Family, text: 'يمكنني مراجعة العقد وتقديم استشارة كاملة خلال 24 ساعة.', cost: '75,000 دينار عراقي' }
         ],
         createdAt: new Date('2023-10-25T10:00:00Z').toISOString(),
     },
     {
         id: 2,
-        clientId: 6,
-        clientName: 'العميلة سارة',
+        authorId: 6,
+        authorName: 'العميلة سارة',
+        authorRole: UserRole.Client,
         title: 'قضية نزاع عمالي',
         description: 'تم فصلي من العمل بشكل تعسفي وأرغب في رفع قضية على الشركة للمطالبة بحقوقي. أبحث عن محامي متخصص في القضايا العمالية.',
         comments: [],
@@ -41,12 +43,13 @@ export const POSTS: Post[] = [
 
 export const CHATS: Chat[] = [
     {
-        id: 'client-5-lawyer-3',
-        clientId: 5,
-        lawyerId: 3,
+        id: 'chat-3-5',
+        participantIds: [3, 5],
         messages: [
             { id: 1, senderId: 5, text: 'مرحبا، بخصوص عرضك على منشوري', timestamp: new Date().toISOString() },
             { id: 2, senderId: 3, text: 'أهلاً بك، يسعدني مساعدتك. هل يمكنك إرسال نسخة من العقد؟', timestamp: new Date().toISOString() },
         ]
     }
 ];
+
+export const REPORTS: Report[] = [];
